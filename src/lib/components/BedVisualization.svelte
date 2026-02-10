@@ -168,6 +168,33 @@
 		}
 		return { x: bp.posX, y: bp.posY };
 	}
+
+	function getHeightSize(matureHeight: string | null | undefined): { label: string; border: string; text: string; bg: string } | null {
+		if (!matureHeight) return null;
+		const text = matureHeight.toLowerCase().trim();
+		const numbers = [...text.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
+		if (numbers.length === 0) return null;
+		const maxNum = Math.max(...numbers);
+		let maxInches = 0;
+
+		if (text.includes('feet') || text.includes('foot') || text.includes('ft') || text.includes("'")) {
+			maxInches = maxNum * 12;
+		} else if (text.includes('inch') || text.includes('in') || text.includes('"')) {
+			maxInches = maxNum;
+		} else if (text.includes('cm')) {
+			maxInches = maxNum / 2.54;
+		} else {
+			maxInches = maxNum > 12 ? maxNum : maxNum * 12;
+		}
+
+		if (maxInches <= 24) {
+			return { label: 'S', border: 'border-amber-400', text: 'text-amber-600', bg: 'bg-amber-50' };
+		} else if (maxInches <= 48) {
+			return { label: 'M', border: 'border-orange-400', text: 'text-orange-600', bg: 'bg-orange-50' };
+		} else {
+			return { label: 'T', border: 'border-rose-400', text: 'text-rose-600', bg: 'bg-rose-50' };
+		}
+	}
 </script>
 
 <svelte:window
@@ -241,9 +268,10 @@
 					{@const plant = getPlantForBedPlant(bp)}
 					{@const pos = getBpPosition(bp)}
 					{@const isDragging = draggingBp?.id === bp.id}
+					{@const hs = getHeightSize(plant?.matureHeight)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
-						class="absolute flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full border bg-white shadow-sm select-none transition-shadow {isDragging ? 'shadow-md border-slate-500 z-20 cursor-grabbing' : 'border-slate-300 z-10 cursor-grab hover:shadow-md hover:border-slate-400'}"
+						class="absolute flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 shadow-sm select-none transition-shadow {isDragging ? 'shadow-md border-slate-500 z-20 cursor-grabbing' : hs ? hs.border + ' z-10 cursor-grab hover:shadow-md' : 'border-slate-300 z-10 cursor-grab hover:shadow-md hover:border-slate-400'} {hs ? hs.bg : 'bg-white'}"
 						style="left: {pos.x}%; top: {pos.y}%; transform: translate(-50%, -50%);"
 						onpointerdown={(e) => {
 							const bedEl = (e.currentTarget as HTMLElement).parentElement;
@@ -253,6 +281,9 @@
 						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate max-w-[3.5rem] sm:max-w-[4.5rem]">
 							{plant?.name || 'Plant'}
 						</div>
+						{#if hs}
+							<div class="text-[8px] sm:text-[9px] font-bold {hs.text}">{hs.label === 'S' ? 'Short' : hs.label === 'M' ? 'Med' : 'Tall'}</div>
+						{/if}
 						<button
 							class="mt-0.5 inline-flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full border border-slate-200 text-[8px] sm:text-[10px] font-semibold text-slate-500 transition hover:border-red-300 hover:bg-red-50 hover:text-red-500"
 							onpointerdown={(e) => e.stopPropagation()}
