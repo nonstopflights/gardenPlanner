@@ -23,6 +23,7 @@
 	let deleting = $state(false);
 	let showImagePicker = $state(false);
 	let editingSection: string | null = $state(null);
+	let showDates = $state(false);
 
 	let formData = $state({
 		name: '',
@@ -66,6 +67,7 @@
 				return;
 			}
 			plant = await res.json();
+			showDates = !!(plant!.plantingDate || plant!.harvestDate);
 			formData = {
 				name: plant!.name || '',
 				variety: plant!.variety || '',
@@ -226,6 +228,8 @@
 		if (data.name) formData.name = data.name;
 		if (data.variety) formData.variety = data.variety;
 		if (data.category) formData.category = data.category;
+		if (data.plantingDate) { formData.plantingDate = data.plantingDate; showDates = true; }
+		if (data.harvestDate) { formData.harvestDate = data.harvestDate; showDates = true; }
 		if (data.spacing) formData.spacing = data.spacing;
 		if (data.sunRequirements) formData.sunRequirements = data.sunRequirements;
 		if (data.waterNeeds) formData.waterNeeds = data.waterNeeds;
@@ -236,6 +240,8 @@
 		if (data.directSowWeeks != null) formData.directSowWeeks = data.directSowWeeks.toString();
 		if (data.companionPlants) formData.companionPlants = data.companionPlants;
 		if (data.matureHeight) formData.matureHeight = data.matureHeight;
+		if (data.growingNotes) formData.growingNotes = data.growingNotes;
+		if (data.harvestingNotes) formData.harvestingNotes = data.harvestingNotes;
 		if (data.seedSource) formData.seedSource = data.seedSource;
 		if (data.seedSourceUrl) formData.seedSourceUrl = data.seedSourceUrl;
 		if (data.seedCost) formData.seedCost = data.seedCost.toString();
@@ -404,22 +410,35 @@
 					<option value="current">Currently Planted</option>
 				</select>
 			</div>
-			<div>
-				<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>
-				<input
-					type="date"
-					bind:value={formData.plantingDate}
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-				/>
-			</div>
-			<div>
-				<label class="mb-1 block text-sm font-medium text-slate-700">Harvest Date</label>
-				<input
-					type="date"
-					bind:value={formData.harvestDate}
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-				/>
-			</div>
+			{#if showDates}
+				<div>
+					<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>
+					<input
+						type="date"
+						bind:value={formData.plantingDate}
+						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					/>
+				</div>
+				<div>
+					<label class="mb-1 block text-sm font-medium text-slate-700">Harvest Date</label>
+					<input
+						type="date"
+						bind:value={formData.harvestDate}
+						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					/>
+				</div>
+			{:else}
+				<div class="flex items-end">
+					<button
+						type="button"
+						onclick={() => (showDates = true)}
+						class="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-500 transition hover:border-slate-400 hover:text-slate-700"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+						Add Planting &amp; Harvest Dates
+					</button>
+				</div>
+			{/if}
 			<div>
 				<label class="mb-1 block text-sm font-medium text-slate-700">Days to Maturity</label>
 				<input
@@ -741,14 +760,27 @@
 			{/snippet}
 			{#snippet editChildren()}
 				<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Planting Date</label>
-						<input type="date" bind:value={formData.plantingDate} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Harvest Date</label>
-						<input type="date" bind:value={formData.harvestDate} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
+					{#if showDates}
+						<div>
+							<label class="mb-1 block text-xs font-medium text-slate-600">Planting Date</label>
+							<input type="date" bind:value={formData.plantingDate} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+						</div>
+						<div>
+							<label class="mb-1 block text-xs font-medium text-slate-600">Harvest Date</label>
+							<input type="date" bind:value={formData.harvestDate} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+						</div>
+					{:else}
+						<div class="sm:col-span-2">
+							<button
+								type="button"
+								onclick={() => (showDates = true)}
+								class="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:border-slate-400 hover:text-slate-700"
+							>
+								<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+								Add Planting &amp; Harvest Dates
+							</button>
+						</div>
+					{/if}
 					<div>
 						<label class="mb-1 block text-xs font-medium text-slate-600">Days to Maturity</label>
 						<input type="number" bind:value={formData.daysToMaturity} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />

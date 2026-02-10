@@ -66,6 +66,8 @@
 		if (data.matureHeight) { formData.matureHeight = data.matureHeight; flashField('matureHeight'); }
 		if (data.seedSource) { formData.seedSource = data.seedSource; flashField('seedSource'); }
 		if (data.seedSourceUrl) { formData.seedSourceUrl = data.seedSourceUrl; flashField('seedSourceUrl'); }
+		if (data.growingNotes) { formData.growingNotes = data.growingNotes; flashField('growingNotes'); }
+		if (data.harvestingNotes) { formData.harvestingNotes = data.harvestingNotes; flashField('harvestingNotes'); }
 		if (data.seedCost) { formData.seedCost = data.seedCost.toString(); flashField('seedCost'); }
 		if (data.plantingDate) { formData.plantingDate = data.plantingDate; flashField('plantingDate'); showDates = true; }
 		if (data.harvestDate) { formData.harvestDate = data.harvestDate; flashField('harvestDate'); showDates = true; }

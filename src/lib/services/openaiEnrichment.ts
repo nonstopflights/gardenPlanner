@@ -29,6 +29,8 @@ export interface PlantLookupResult {
 	waterNeeds: string | null;
 	companionPlants: string | null;
 	matureHeight: string | null;
+	growingNotes: string | null;
+	harvestingNotes: string | null;
 	seedSource: string | null;
 	seedSourceUrl: string | null;
 	seedCost: number | null;
@@ -104,13 +106,15 @@ const PLANT_JSON_SCHEMA = {
 		growing_details: {
 			type: 'object',
 			additionalProperties: false,
-			required: ['spacing', 'sun_requirements', 'water_needs', 'companion_plants', 'mature_height'],
+			required: ['spacing', 'sun_requirements', 'water_needs', 'companion_plants', 'mature_height', 'growing_notes', 'harvesting_notes'],
 			properties: {
 				spacing: { type: ['string', 'null'] },
 				sun_requirements: { type: ['string', 'null'] },
 				water_needs: { type: ['string', 'null'] },
 				companion_plants: { type: 'array', items: { type: 'string' } },
-				mature_height: { type: ['string', 'null'], description: 'e.g. "4-6 feet", "12-18 inches"' }
+				mature_height: { type: ['string', 'null'], description: 'e.g. "4-6 feet", "12-18 inches"' },
+				growing_notes: { type: ['string', 'null'], description: 'Brief cultivation tips, soil preferences, fertilizing advice, pest/disease notes' },
+				harvesting_notes: { type: ['string', 'null'], description: 'When and how to harvest, signs of ripeness, storage tips' }
 			}
 		},
 		seed_info: {
@@ -132,7 +136,9 @@ Do not include markdown, comments, trailing commas, or additional keys.
 If a field is truly unknown, use null (not an empty string).
 Use the user's location and frost dates to compute all suggested planting dates and date ranges.
 Prefer common, broadly-correct horticultural guidance when variety-specific details are unknown.
-Always try to provide values for days_to_maturity, spacing, mature_height, sun_requirements, water_needs, companion_plants, and the planting schedule — these are rarely truly unknown for common garden plants.
+Always try to provide values for days_to_maturity, spacing, mature_height, sun_requirements, water_needs, companion_plants, growing_notes, harvesting_notes, and the planting schedule — these are rarely truly unknown for common garden plants.
+For growing_notes, include practical cultivation tips like soil preferences, fertilizing, common pests/diseases, and care advice.
+For harvesting_notes, include when to harvest, signs of ripeness, how to pick, and storage tips.
 For planting_season use "Spring", "Fall", or "Spring and Fall".
 For category always return "Want to Plant".`;
 
@@ -221,6 +227,8 @@ ${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
 				? data.growing_details.companion_plants.join(', ')
 				: null,
 			matureHeight: data.growing_details?.mature_height || null,
+			growingNotes: data.growing_details?.growing_notes || null,
+			harvestingNotes: data.growing_details?.harvesting_notes || null,
 			seedSource: data.seed_info?.seed_source || null,
 			seedSourceUrl: data.seed_info?.seed_source_url || null,
 			seedCost: typeof data.seed_info?.seed_cost === 'number' ? data.seed_info.seed_cost : null
