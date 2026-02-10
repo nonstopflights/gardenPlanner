@@ -5,8 +5,8 @@ module.exports = {
 			script: 'build/index.js',
 			env: {
 				NODE_ENV: 'production',
-				PORT: 3000,
-				ORIGIN: 'http://localhost:3000'
+				PORT: 3005,
+				ORIGIN: 'http://localhost:3005'
 			}
 		}
 	]
