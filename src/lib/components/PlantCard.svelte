@@ -12,6 +12,40 @@
 
 	let isDragging = $state(false);
 
+	function getHeightSize(matureHeight: string | null | undefined): { label: string; class: string } | null {
+		if (!matureHeight) return null;
+		// Parse the max height in inches from strings like "4-6 feet", "12 inches", "18-24 in", "2 ft"
+		const text = matureHeight.toLowerCase().trim();
+		let maxInches = 0;
+
+		// Match all numbers in the string
+		const numbers = [...text.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
+		if (numbers.length === 0) return null;
+
+		const maxNum = Math.max(...numbers);
+
+		if (text.includes('feet') || text.includes('foot') || text.includes('ft') || text.includes("'")) {
+			maxInches = maxNum * 12;
+		} else if (text.includes('inch') || text.includes('in') || text.includes('"')) {
+			maxInches = maxNum;
+		} else if (text.includes('cm')) {
+			maxInches = maxNum / 2.54;
+		} else {
+			// Assume feet if number > 0 and no unit (most garden heights are in feet)
+			maxInches = maxNum > 12 ? maxNum : maxNum * 12;
+		}
+
+		if (maxInches <= 24) {
+			return { label: 'Short', class: 'border-amber-200 bg-amber-50 text-amber-700' };
+		} else if (maxInches <= 48) {
+			return { label: 'Medium', class: 'border-orange-200 bg-orange-50 text-orange-700' };
+		} else {
+			return { label: 'Tall', class: 'border-rose-200 bg-rose-50 text-rose-700' };
+		}
+	}
+
+	let heightSize = $derived(getHeightSize(plant.matureHeight));
+
 	function handleDragStart(event: DragEvent) {
 		if (!browser) return;
 		isDragging = true;
@@ -54,13 +88,20 @@
 	{#if plant.variety}
 		<div class="text-sm text-slate-500">{plant.variety}</div>
 	{/if}
-	{#if plant.category}
-		<div class="mt-3">
+	<div class="mt-3 flex flex-wrap gap-1.5">
+		{#if plant.category}
 			<span
 				class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide {plant.category === 'current' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : plant.category === 'want' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-slate-200 bg-slate-50 text-slate-600'}"
 			>
 				{plant.category}
 			</span>
-		</div>
-	{/if}
+		{/if}
+		{#if heightSize}
+			<span
+				class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide {heightSize.class}"
+			>
+				{heightSize.label}
+			</span>
+		{/if}
+	</div>
 </div>

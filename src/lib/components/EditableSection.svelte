@@ -34,7 +34,7 @@
 
 <div bind:this={containerElement} class="rounded-2xl border border-slate-200 bg-white shadow-sm transition {editing ? 'ring-2 ring-slate-300' : ''}">
 	{#if editing}
-		<div class="p-6">
+		<div class="p-4 sm:p-6">
 			<div class="mb-4 flex items-center justify-between">
 				<h2 class="text-base font-semibold text-slate-900">{title}</h2>
 				<div class="flex gap-2">
@@ -57,15 +57,15 @@
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<div
 			onclick={onStartEdit}
-			class="group cursor-pointer rounded-2xl p-6 transition hover:bg-slate-50/50"
+			class="group cursor-pointer rounded-2xl p-4 sm:p-6 transition hover:bg-slate-50/50"
 		>
 			<div class="flex items-center justify-between">
 				<h2 class="text-base font-semibold text-slate-900">{title}</h2>
-				<div class="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition group-hover:opacity-100">
+				<div class="flex items-center gap-1 text-xs text-slate-400 opacity-100 sm:opacity-0 transition group-hover:opacity-100">
 					<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
 					</svg>
-					Click to edit
+					<span class="hidden sm:inline">Click to edit</span>
 				</div>
 			</div>
 			{@render children()}

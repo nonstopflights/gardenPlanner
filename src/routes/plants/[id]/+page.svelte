@@ -358,20 +358,20 @@
 	<a
 		href="/plants/{plant.id}"
 		onclick={(e) => { e.preventDefault(); editing = false; loadPlant(); }}
-		class="text-sm text-slate-500 hover:text-slate-700"
+		class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 -ml-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition"
 	>
 		&larr; Back to Plant
 	</a>
 
 	<!-- Seed site search in edit mode -->
-	<div class="mt-4">
+	<div class="mt-3">
 		<SeedSearchSection
 			initialQuery={formData.name}
 			onApplyData={applyLookupData}
 		/>
 	</div>
 
-	<div class="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+	<div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 		<div class="flex items-center justify-between">
 			<h2 class="text-lg font-semibold text-slate-900">Edit Plant</h2>
 			<button
@@ -618,11 +618,11 @@
 	</div>
 {:else}
 	<!-- View mode -->
-	<a href="/plants" class="text-sm text-slate-500 hover:text-slate-700">&larr; Back to Plants</a>
+	<a href="/plants" class="inline-flex items-center gap-1 rounded-md px-2 py-1.5 -ml-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 active:bg-slate-200 transition">&larr; Back to Plants</a>
 
 	<!-- Header section -->
-	<div class="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-		<div class="flex flex-col gap-6 md:flex-row">
+	<div class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+		<div class="flex flex-col gap-4 sm:gap-6 md:flex-row">
 			{#if images.length > 0}
 				<div class="flex-shrink-0 md:w-56">
 					<img
@@ -632,45 +632,43 @@
 					/>
 				</div>
 			{/if}
-			<div class="flex-1">
-				<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-					<div>
-						<h1 class="text-2xl font-bold text-slate-900">{plant.name}</h1>
-						{#if plant.variety}
-							<p class="mt-0.5 text-base text-slate-500">{plant.variety}</p>
-						{/if}
-						<span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
-							{plant.category === 'want' ? 'Want to Plant' : plant.category}
-						</span>
-					</div>
-					<div class="flex gap-2">
-						<button
-							onclick={() => (showImagePicker = true)}
-							class="inline-flex h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-						>
-							Find Images
-						</button>
-						<button
-							onclick={() => (editing = true)}
-							class="inline-flex h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
-						>
-							Edit
-						</button>
-						<button
-							onclick={handleDelete}
-							disabled={deleting}
-							class="inline-flex h-9 items-center justify-center rounded-md border border-red-200 bg-white px-3 text-sm font-medium text-red-600 shadow-sm transition hover:bg-red-50 disabled:opacity-50"
-						>
-							{deleting ? 'Deleting...' : 'Delete'}
-						</button>
-					</div>
+			<div class="flex-1 min-w-0">
+				<div>
+					<h1 class="text-xl sm:text-2xl font-bold text-slate-900">{plant.name}</h1>
+					{#if plant.variety}
+						<p class="mt-0.5 text-sm sm:text-base text-slate-500">{plant.variety}</p>
+					{/if}
+					<span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
+						{plant.category === 'want' ? 'Want to Plant' : plant.category}
+					</span>
+				</div>
+				<div class="mt-3 flex flex-wrap gap-2">
+					<button
+						onclick={() => (showImagePicker = true)}
+						class="inline-flex h-8 sm:h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 active:bg-slate-100"
+					>
+						Find Images
+					</button>
+					<button
+						onclick={() => (editing = true)}
+						class="inline-flex h-8 sm:h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 active:bg-slate-100"
+					>
+						Edit
+					</button>
+					<button
+						onclick={handleDelete}
+						disabled={deleting}
+						class="inline-flex h-8 sm:h-9 items-center justify-center rounded-md border border-red-200 bg-white px-2.5 sm:px-3 text-xs sm:text-sm font-medium text-red-600 shadow-sm transition hover:bg-red-50 active:bg-red-100 disabled:opacity-50"
+					>
+						{deleting ? 'Deleting...' : 'Delete'}
+					</button>
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Info cards grid -->
-	<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+	<div class="mt-4 sm:mt-6 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
 		<!-- Planting Info -->
 		<EditableSection
 			title="Planting Information"
@@ -848,9 +846,9 @@
 							</div>
 						{/if}
 						{#if plant?.seedSourceUrl}
-							<div>
+							<div class="min-w-0">
 								<dt class="text-sm font-medium text-slate-500">URL</dt>
-								<dd>
+								<dd class="truncate">
 									<a
 										href={plant.seedSourceUrl}
 										target="_blank"
@@ -893,7 +891,7 @@
 		</EditableSection>
 
 		<!-- Growing Notes (WYSIWYG) -->
-		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+		<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 			<h2 class="text-base font-semibold text-slate-900">Growing Notes</h2>
 			<div class="mt-3">
 				<InlineEditor
@@ -905,7 +903,7 @@
 		</div>
 
 		<!-- Harvesting Notes (WYSIWYG) -->
-		<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+		<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 			<h2 class="text-base font-semibold text-slate-900">Harvesting Notes</h2>
 			<div class="mt-3">
 				<InlineEditor
@@ -918,7 +916,7 @@
 
 		<!-- Web Info -->
 		{#if webInfo}
-			<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:col-span-2">
+			<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm md:col-span-2">
 				<h2 class="text-base font-semibold text-slate-900">Web Information</h2>
 				{#if webInfo.description}
 					<p class="mt-4 text-sm text-slate-600">{webInfo.description}</p>

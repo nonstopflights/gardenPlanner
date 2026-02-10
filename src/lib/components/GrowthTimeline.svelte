@@ -306,7 +306,7 @@
 											{/if}
 										</div>
 
-										<div class="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+										<div class="flex items-center gap-1 sm:opacity-0 transition-opacity group-hover:opacity-100">
 											<!-- Edit caption button -->
 											<button
 												onclick={() => startEditing(img)}
