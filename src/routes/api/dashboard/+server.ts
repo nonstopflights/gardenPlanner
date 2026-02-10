@@ -43,6 +43,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				wantPlants,
 				totalBeds
 			},
+			plants,
 			recentJournal,
 			recentActivities,
 			upcomingHarvests
