@@ -13,6 +13,9 @@
 	// Field highlight state for AI lookup flash
 	let highlightedFields: Set<string> = $state(new Set());
 
+	// Optional fields hidden behind "Add+" buttons
+	let showDates = $state(false);
+
 	let formData = $state({
 		name: '',
 		variety: '',
@@ -64,6 +67,8 @@
 		if (data.seedSource) { formData.seedSource = data.seedSource; flashField('seedSource'); }
 		if (data.seedSourceUrl) { formData.seedSourceUrl = data.seedSourceUrl; flashField('seedSourceUrl'); }
 		if (data.seedCost) { formData.seedCost = data.seedCost.toString(); flashField('seedCost'); }
+		if (data.plantingDate) { formData.plantingDate = data.plantingDate; flashField('plantingDate'); showDates = true; }
+		if (data.harvestDate) { formData.harvestDate = data.harvestDate; flashField('harvestDate'); showDates = true; }
 		if (data.images?.length > 0) {
 			selectedImageUrl = data.images[0];
 			selectedImagePreview = data.images[0];
@@ -205,22 +210,35 @@
 				<option value="current">Currently Planted</option>
 			</select>
 		</div>
-		<div>
-			<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>
-			<input
-				type="date"
-				bind:value={formData.plantingDate}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('plantingDate')}"
-			/>
-		</div>
-		<div>
-			<label class="mb-1 block text-sm font-medium text-slate-700">Harvest Date</label>
-			<input
-				type="date"
-				bind:value={formData.harvestDate}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('harvestDate')}"
-			/>
-		</div>
+		{#if showDates}
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>
+				<input
+					type="date"
+					bind:value={formData.plantingDate}
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('plantingDate')}"
+				/>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Harvest Date</label>
+				<input
+					type="date"
+					bind:value={formData.harvestDate}
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('harvestDate')}"
+				/>
+			</div>
+		{:else}
+			<div class="flex items-end">
+				<button
+					type="button"
+					onclick={() => (showDates = true)}
+					class="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-3 py-2 text-sm font-medium text-slate-500 transition hover:border-slate-400 hover:text-slate-700"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+					Add Planting &amp; Harvest Dates
+				</button>
+			</div>
+		{/if}
 		<div>
 			<label class="mb-1 block text-sm font-medium text-slate-700">Days to Maturity</label>
 			<input
