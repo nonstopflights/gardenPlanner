@@ -27,6 +27,7 @@ export const plants = sqliteTable('plants', {
 	sunRequirements: text('sun_requirements'),
 	waterNeeds: text('water_needs'),
 	companionPlants: text('companion_plants'), // JSON array or comma-separated
+	matureHeight: text('mature_height'), // e.g. "4-6 feet", "12 inches"
 	daysToMaturity: integer('days_to_maturity'),
 	growingNotes: text('growing_notes'),
 	harvestingNotes: text('harvesting_notes'),

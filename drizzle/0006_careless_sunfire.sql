@@ -1,0 +1,1 @@
+ALTER TABLE `plants` ADD `mature_height` text;

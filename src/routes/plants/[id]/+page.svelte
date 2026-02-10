@@ -34,6 +34,7 @@
 		sunRequirements: '',
 		waterNeeds: '',
 		companionPlants: '',
+		matureHeight: '',
 		daysToMaturity: '',
 		plantingSeason: '',
 		startIndoorsWeeks: '',
@@ -75,6 +76,7 @@
 				sunRequirements: plant!.sunRequirements || '',
 				waterNeeds: plant!.waterNeeds || '',
 				companionPlants: plant!.companionPlants || '',
+				matureHeight: plant!.matureHeight || '',
 				daysToMaturity: plant!.daysToMaturity?.toString() || '',
 				plantingSeason: plant!.plantingSeason || '',
 				startIndoorsWeeks: plant!.startIndoorsWeeks?.toString() || '',
@@ -124,6 +126,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					...formData,
+					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 					plantingSeason: formData.plantingSeason || null,
 					startIndoorsWeeks: formData.startIndoorsWeeks ? parseInt(formData.startIndoorsWeeks) : null,
@@ -219,20 +222,22 @@
 		}
 	}
 
-	function applyScrapedData(data: any) {
+	function applyLookupData(data: any) {
 		if (data.name) formData.name = data.name;
 		if (data.variety) formData.variety = data.variety;
+		if (data.category) formData.category = data.category;
 		if (data.spacing) formData.spacing = data.spacing;
 		if (data.sunRequirements) formData.sunRequirements = data.sunRequirements;
 		if (data.waterNeeds) formData.waterNeeds = data.waterNeeds;
 		if (data.daysToMaturity) formData.daysToMaturity = data.daysToMaturity.toString();
-		if (data.growingNotes) formData.growingNotes = data.growingNotes;
-		if (data.harvestingNotes) formData.harvestingNotes = data.harvestingNotes;
 		if (data.plantingSeason) formData.plantingSeason = data.plantingSeason;
-		if (data.startIndoorsWeeks) formData.startIndoorsWeeks = data.startIndoorsWeeks.toString();
-		if (data.directSowWeeks) formData.directSowWeeks = data.directSowWeeks.toString();
-		if (data.source) formData.seedSource = data.source;
-		if (data.productUrl) formData.seedSourceUrl = data.productUrl;
+		if (data.startIndoorsWeeks != null) formData.startIndoorsWeeks = data.startIndoorsWeeks.toString();
+		if (data.transplantWeeks != null) formData.transplantWeeks = data.transplantWeeks.toString();
+		if (data.directSowWeeks != null) formData.directSowWeeks = data.directSowWeeks.toString();
+		if (data.companionPlants) formData.companionPlants = data.companionPlants;
+		if (data.matureHeight) formData.matureHeight = data.matureHeight;
+		if (data.seedSource) formData.seedSource = data.seedSource;
+		if (data.seedSourceUrl) formData.seedSourceUrl = data.seedSourceUrl;
 		if (data.seedCost) formData.seedCost = data.seedCost.toString();
 	}
 
@@ -281,7 +286,8 @@
 			spacing: formData.spacing || null,
 			sunRequirements: formData.sunRequirements || null,
 			waterNeeds: formData.waterNeeds || null,
-			companionPlants: formData.companionPlants || null
+			companionPlants: formData.companionPlants || null,
+			matureHeight: formData.matureHeight || null
 		});
 	}
 
@@ -297,6 +303,7 @@
 		formData.sunRequirements = '';
 		formData.waterNeeds = '';
 		formData.companionPlants = '';
+		formData.matureHeight = '';
 		await savePlantingInfo();
 	}
 
@@ -354,7 +361,7 @@
 	<div class="mt-4">
 		<SeedSearchSection
 			initialQuery={formData.name}
-			onApplyData={applyScrapedData}
+			onApplyData={applyLookupData}
 		/>
 	</div>
 
@@ -515,6 +522,15 @@
 					type="text"
 					bind:value={formData.companionPlants}
 					placeholder="e.g., Basil, Marigold"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				/>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Mature Height</label>
+				<input
+					type="text"
+					bind:value={formData.matureHeight}
+					placeholder="e.g., 4-6 feet"
 					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
 				/>
 			</div>
@@ -712,6 +728,12 @@
 							<dd class="text-sm text-slate-700">{plant.companionPlants}</dd>
 						</div>
 					{/if}
+					{#if plant?.matureHeight}
+						<div>
+							<dt class="text-sm font-medium text-slate-500">Mature Height</dt>
+							<dd class="text-sm text-slate-700">{plant.matureHeight}</dd>
+						</div>
+					{/if}
 					{#if !plant?.plantingDate && !plant?.harvestDate && !plant?.daysToMaturity && !plant?.spacing && !plant?.sunRequirements && !plant?.waterNeeds}
 						<p class="text-sm italic text-slate-400">No planting info yet. Click to add.</p>
 					{/if}
@@ -764,9 +786,13 @@
 						<label class="mb-1 block text-xs font-medium text-slate-600">Water Needs</label>
 						<input type="text" bind:value={formData.waterNeeds} placeholder="e.g., Moderate" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 					</div>
-					<div class="sm:col-span-2">
+					<div>
 						<label class="mb-1 block text-xs font-medium text-slate-600">Companion Plants</label>
 						<input type="text" bind:value={formData.companionPlants} placeholder="e.g., Basil, Marigold" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+					<div>
+						<label class="mb-1 block text-xs font-medium text-slate-600">Mature Height</label>
+						<input type="text" bind:value={formData.matureHeight} placeholder="e.g., 4-6 feet" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 					</div>
 				</div>
 			{/snippet}

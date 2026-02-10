@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
 import { env } from '$env/dynamic/private';
-import { searchSiteImages } from '$lib/services/seedSiteScraper';
+// import { searchSiteImages } from '$lib/services/seedSiteScraper';
 
 interface ImageCandidate {
 	url: string;
@@ -103,18 +103,17 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Search all sources in parallel
-		const [bingImages, trefleImages, wikiImages, siteImages] = await Promise.all([
+		const [bingImages, trefleImages, wikiImages] = await Promise.all([
 			searchBingImages(query).catch(() => [] as ImageCandidate[]),
 			searchTrefleImages(query).catch(() => [] as ImageCandidate[]),
-			searchWikipediaImages(query).catch(() => [] as ImageCandidate[]),
-			searchSiteImages(query).catch(() => [] as ImageCandidate[])
+			searchWikipediaImages(query).catch(() => [] as ImageCandidate[])
 		]);
 
 		// Combine and deduplicate by URL — web results first for best coverage
 		const seen = new Set<string>();
 		const allImages: ImageCandidate[] = [];
 
-		for (const img of [...bingImages, ...trefleImages, ...wikiImages, ...siteImages]) {
+		for (const img of [...bingImages, ...trefleImages, ...wikiImages]) {
 			if (!seen.has(img.url) && img.url) {
 				seen.add(img.url);
 				allImages.push(img);

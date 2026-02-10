@@ -43,6 +43,13 @@
       "when": 1770505912719,
       "tag": "0005_redundant_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1770675768041,
+      "tag": "0006_careless_sunfire",
+      "breakpoints": true
     }
   ]
 }

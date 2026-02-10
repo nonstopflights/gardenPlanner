@@ -43,17 +43,9 @@
 	</p>
 </div>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-	<div>
-		<h1 class="text-lg font-semibold text-slate-900">Plant Library</h1>
-		<p class="text-sm text-slate-500">Curate varieties before placing them in beds.</p>
-	</div>
-	<a
-		href="/plants/new"
-		class="inline-flex h-9 items-center justify-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-	>
-		+ Add Plant
-	</a>
+<div class="mb-6">
+	<h1 class="text-lg font-semibold text-slate-900">Plant Library</h1>
+	<p class="text-sm text-slate-500">Curate varieties before placing them in beds.</p>
 </div>
 
 <PlantLibrary

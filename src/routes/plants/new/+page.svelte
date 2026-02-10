@@ -4,14 +4,14 @@
 	import SeedSearchSection from '$lib/components/SeedSearchSection.svelte';
 
 	let loading = $state(false);
-	let searching = $state(false);
-	let searchQuery = $state('');
-	let searchResults: any = $state(null);
 
 	// Image picker state
 	let showImagePicker = $state(false);
 	let selectedImageUrl: string | null = $state(null);
 	let selectedImagePreview: string | null = $state(null);
+
+	// Field highlight state for AI lookup flash
+	let highlightedFields: Set<string> = $state(new Set());
 
 	let formData = $state({
 		name: '',
@@ -23,6 +23,7 @@
 		sunRequirements: '',
 		waterNeeds: '',
 		companionPlants: '',
+		matureHeight: '',
 		daysToMaturity: '',
 		plantingSeason: '',
 		startIndoorsWeeks: '',
@@ -35,57 +36,43 @@
 		seedCost: ''
 	});
 
-	async function handleSearch() {
-		if (!searchQuery.trim()) return;
-
-		searching = true;
-		try {
-			const res = await fetch('/api/plants/search', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ query: searchQuery })
-			});
-
-			if (res.ok) {
-				searchResults = await res.json();
-				// Auto-fill form with search results
-				if (searchResults) {
-					formData.name = searchResults.name || formData.name;
-					formData.variety = searchResults.variety || formData.variety;
-					formData.spacing = searchResults.spacing || formData.spacing;
-					formData.sunRequirements = searchResults.sunRequirements || formData.sunRequirements;
-					formData.waterNeeds = searchResults.waterNeeds || formData.waterNeeds;
-					formData.daysToMaturity = searchResults.daysToMaturity?.toString() || formData.daysToMaturity;
-					formData.growingNotes = searchResults.growingNotes || formData.growingNotes;
-					formData.harvestingNotes = searchResults.harvestingNotes || formData.harvestingNotes;
-				}
-			}
-		} catch (error) {
-			console.error('Search failed:', error);
-		} finally {
-			searching = false;
-		}
+	function flashField(field: string) {
+		highlightedFields.add(field);
+		highlightedFields = new Set(highlightedFields);
 	}
 
-	function applyScrapedData(data: any) {
-		if (data.name) formData.name = data.name;
-		if (data.variety) formData.variety = data.variety;
-		if (data.spacing) formData.spacing = data.spacing;
-		if (data.sunRequirements) formData.sunRequirements = data.sunRequirements;
-		if (data.waterNeeds) formData.waterNeeds = data.waterNeeds;
-		if (data.daysToMaturity) formData.daysToMaturity = data.daysToMaturity.toString();
-		if (data.growingNotes) formData.growingNotes = data.growingNotes;
-		if (data.harvestingNotes) formData.harvestingNotes = data.harvestingNotes;
-		if (data.plantingSeason) formData.plantingSeason = data.plantingSeason;
-		if (data.startIndoorsWeeks) formData.startIndoorsWeeks = data.startIndoorsWeeks.toString();
-		if (data.directSowWeeks) formData.directSowWeeks = data.directSowWeeks.toString();
-		if (data.source) formData.seedSource = data.source;
-		if (data.productUrl) formData.seedSourceUrl = data.productUrl;
-		if (data.seedCost) formData.seedCost = data.seedCost.toString();
+	function clearHighlights() {
+		setTimeout(() => {
+			highlightedFields = new Set();
+		}, 1500);
+	}
+
+	function applyLookupData(data: any) {
+		if (data.name) { formData.name = data.name; flashField('name'); }
+		if (data.variety) { formData.variety = data.variety; flashField('variety'); }
+		if (data.category) { formData.category = data.category; flashField('category'); }
+		if (data.spacing) { formData.spacing = data.spacing; flashField('spacing'); }
+		if (data.sunRequirements) { formData.sunRequirements = data.sunRequirements; flashField('sunRequirements'); }
+		if (data.waterNeeds) { formData.waterNeeds = data.waterNeeds; flashField('waterNeeds'); }
+		if (data.daysToMaturity) { formData.daysToMaturity = data.daysToMaturity.toString(); flashField('daysToMaturity'); }
+		if (data.plantingSeason) { formData.plantingSeason = data.plantingSeason; flashField('plantingSeason'); }
+		if (data.startIndoorsWeeks != null) { formData.startIndoorsWeeks = data.startIndoorsWeeks.toString(); flashField('startIndoorsWeeks'); }
+		if (data.transplantWeeks != null) { formData.transplantWeeks = data.transplantWeeks.toString(); flashField('transplantWeeks'); }
+		if (data.directSowWeeks != null) { formData.directSowWeeks = data.directSowWeeks.toString(); flashField('directSowWeeks'); }
+		if (data.companionPlants) { formData.companionPlants = data.companionPlants; flashField('companionPlants'); }
+		if (data.matureHeight) { formData.matureHeight = data.matureHeight; flashField('matureHeight'); }
+		if (data.seedSource) { formData.seedSource = data.seedSource; flashField('seedSource'); }
+		if (data.seedSourceUrl) { formData.seedSourceUrl = data.seedSourceUrl; flashField('seedSourceUrl'); }
+		if (data.seedCost) { formData.seedCost = data.seedCost.toString(); flashField('seedCost'); }
 		if (data.images?.length > 0) {
 			selectedImageUrl = data.images[0];
 			selectedImagePreview = data.images[0];
 		}
+		clearHighlights();
+	}
+
+	function fc(field: string): string {
+		return highlightedFields.has(field) ? ' ai-flash' : '';
 	}
 
 	function handleImageSelect(imagePath: string) {
@@ -103,6 +90,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					...formData,
+					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 					plantingSeason: formData.plantingSeason || null,
 					startIndoorsWeeks: formData.startIndoorsWeeks ? parseInt(formData.startIndoorsWeeks) : null,
@@ -119,15 +107,6 @@
 			}
 
 			const newPlant = await createRes.json();
-
-			// If we have search results, save web info and download images
-			if (searchResults && searchQuery) {
-				await fetch('/api/plants/search', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ query: searchQuery, plantId: newPlant.id })
-				});
-			}
 
 			// Download selected image for the new plant
 			if (selectedImageUrl) {
@@ -152,43 +131,24 @@
 	}
 </script>
 
+<style>
+	@keyframes ai-field-flash {
+		0% { background-color: rgb(220 252 231); border-color: rgb(74 222 128); }
+		100% { background-color: white; border-color: rgb(226 232 240); }
+	}
+	:global(.ai-flash) {
+		animation: ai-field-flash 1.5s ease-out;
+	}
+</style>
+
 <a href="/plants" class="text-sm text-slate-500 hover:text-slate-700">&larr; Back to Plants</a>
 
 <h1 class="mt-4 text-2xl font-bold text-slate-900">Add New Plant</h1>
 
-<!-- Search section -->
-<div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-	<h2 class="text-lg font-semibold text-slate-900">Search for Plant Information</h2>
-	<div class="mt-4 flex gap-2">
-		<input
-			type="text"
-			bind:value={searchQuery}
-			placeholder="Search for plant variety (e.g., 'Roma Tomato')"
-			class="flex-1 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-			onkeydown={(e) => e.key === 'Enter' && handleSearch()}
-		/>
-		<button
-			onclick={handleSearch}
-			disabled={searching}
-			class="rounded-md bg-slate-900 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
-		>
-			{searching ? 'Searching...' : 'Search'}
-		</button>
-	</div>
-	{#if searchResults}
-		<div class="mt-3 rounded-md border border-slate-200 bg-slate-50 p-3">
-			<p class="text-sm text-slate-700">
-				Found information for "{searchResults.name}". Form has been auto-filled.
-			</p>
-		</div>
-	{/if}
-</div>
-
-<!-- Seed site search -->
+<!-- Plant lookup -->
 <div class="mt-6">
 	<SeedSearchSection
-		initialQuery={searchQuery}
-		onApplyData={applyScrapedData}
+		onApplyData={applyLookupData}
 	/>
 </div>
 
@@ -222,7 +182,7 @@
 				type="text"
 				bind:value={formData.name}
 				required
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('name')}"
 			/>
 		</div>
 		<div>
@@ -230,7 +190,7 @@
 			<input
 				type="text"
 				bind:value={formData.variety}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('variety')}"
 			/>
 		</div>
 		<div>
@@ -238,7 +198,7 @@
 			<select
 				bind:value={formData.category}
 				required
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('category')}"
 			>
 				<option value="past">Past</option>
 				<option value="want">Want to Plant</option>
@@ -250,7 +210,7 @@
 			<input
 				type="date"
 				bind:value={formData.plantingDate}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('plantingDate')}"
 			/>
 		</div>
 		<div>
@@ -258,7 +218,7 @@
 			<input
 				type="date"
 				bind:value={formData.harvestDate}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('harvestDate')}"
 			/>
 		</div>
 		<div>
@@ -266,7 +226,7 @@
 			<input
 				type="number"
 				bind:value={formData.daysToMaturity}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('daysToMaturity')}"
 			/>
 		</div>
 		<!-- Planting Schedule Section -->
@@ -280,7 +240,7 @@
 			<label class="mb-1 block text-sm font-medium text-slate-700">Planting Season</label>
 			<select
 				bind:value={formData.plantingSeason}
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('plantingSeason')}"
 			>
 				<option value="">Not set</option>
 				<option value="spring">Spring</option>
@@ -295,7 +255,7 @@
 					type="number"
 					bind:value={formData.startIndoorsWeeks}
 					placeholder="e.g., 6"
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('startIndoorsWeeks')}"
 				/>
 				<span class="flex-shrink-0 text-xs text-slate-500">weeks before last frost</span>
 			</div>
@@ -307,7 +267,7 @@
 					type="number"
 					bind:value={formData.transplantWeeks}
 					placeholder="e.g., 2"
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('transplantWeeks')}"
 				/>
 				<span class="flex-shrink-0 text-xs text-slate-500">weeks after last frost</span>
 			</div>
@@ -319,7 +279,7 @@
 					type="number"
 					bind:value={formData.directSowWeeks}
 					placeholder="e.g., 0"
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('directSowWeeks')}"
 				/>
 				<span class="flex-shrink-0 text-xs text-slate-500">weeks after last frost</span>
 			</div>
@@ -336,7 +296,7 @@
 				type="text"
 				bind:value={formData.spacing}
 				placeholder="e.g., 18 inches"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('spacing')}"
 			/>
 		</div>
 		<div>
@@ -345,7 +305,7 @@
 				type="text"
 				bind:value={formData.sunRequirements}
 				placeholder="e.g., Full sun"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('sunRequirements')}"
 			/>
 		</div>
 		<div>
@@ -354,7 +314,7 @@
 				type="text"
 				bind:value={formData.waterNeeds}
 				placeholder="e.g., Moderate"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('waterNeeds')}"
 			/>
 		</div>
 		<div>
@@ -363,7 +323,16 @@
 				type="text"
 				bind:value={formData.companionPlants}
 				placeholder="e.g., Basil, Marigold"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('companionPlants')}"
+			/>
+		</div>
+		<div>
+			<label class="mb-1 block text-sm font-medium text-slate-700">Mature Height</label>
+			<input
+				type="text"
+				bind:value={formData.matureHeight}
+				placeholder="e.g., 4-6 feet"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('matureHeight')}"
 			/>
 		</div>
 
@@ -374,7 +343,7 @@
 				type="text"
 				bind:value={formData.seedSource}
 				placeholder="e.g., Johnny's Seeds"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('seedSource')}"
 			/>
 		</div>
 		<div>
@@ -383,7 +352,7 @@
 				type="url"
 				bind:value={formData.seedSourceUrl}
 				placeholder="https://..."
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('seedSourceUrl')}"
 			/>
 		</div>
 		<div>
@@ -393,7 +362,7 @@
 				step="0.01"
 				bind:value={formData.seedCost}
 				placeholder="0.00"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('seedCost')}"
 			/>
 		</div>
 
@@ -402,7 +371,7 @@
 			<textarea
 				bind:value={formData.growingNotes}
 				rows="4"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('growingNotes')}"
 			></textarea>
 		</div>
 		<div class="md:col-span-2">
@@ -410,7 +379,7 @@
 			<textarea
 				bind:value={formData.harvestingNotes}
 				rows="4"
-				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('harvestingNotes')}"
 			></textarea>
 		</div>
 	</div>
@@ -433,7 +402,7 @@
 
 {#if showImagePicker}
 	<ImagePickerModal
-		plantName={formData.name || searchQuery}
+		plantName={formData.name}
 		onSelect={handleImageSelect}
 		onClose={() => (showImagePicker = false)}
 	/>
