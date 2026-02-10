@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { writeFile, mkdir, copyFile } from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import sharp from 'sharp';
@@ -21,8 +21,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			throw error(400, 'Missing file or plantId');
 		}
 
-		const subpath = join('plant-images', 'uploads');
-		const uploadsDir = join(process.cwd(), 'static', subpath);
+		const uploadsDir = join(process.cwd(), 'static', 'plant-images', 'uploads');
 		if (!existsSync(uploadsDir)) {
 			await mkdir(uploadsDir, { recursive: true });
 		}
@@ -30,7 +29,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const timestamp = Date.now();
 		const filename = `${plantId}_${timestamp}_${file.name}`;
 		const filepath = join(uploadsDir, filename);
-		const relativePath = `/plant-images/uploads/${filename}`;
+		const relativePath = `/api/serve-image/plant-images/uploads/${filename}`;
 
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);
@@ -39,19 +38,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			.resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
 			.jpeg({ quality: 85 })
 			.toFile(filepath);
-
-		// Copy to build/client so adapter-node serves it immediately in production
-		const buildDir = join(process.cwd(), 'build', 'client', subpath);
-		if (existsSync(join(process.cwd(), 'build', 'client'))) {
-			if (!existsSync(buildDir)) {
-				await mkdir(buildDir, { recursive: true });
-			}
-			try {
-				await copyFile(filepath, join(buildDir, filename));
-			} catch {
-				// Non-fatal — next build will pick it up from static/
-			}
-		}
 
 		const image = await queries.addPlantImage({
 			plantId,

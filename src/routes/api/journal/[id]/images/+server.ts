@@ -36,7 +36,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
 		const filename = `journal_${entryId}_${timestamp}_${safeName}`;
 		const filepath = join(uploadsDir, filename);
-		const relativePath = `/journal-images/uploads/${filename}`;
+		const relativePath = `/api/serve-image/journal-images/uploads/${filename}`;
 
 		const arrayBuffer = await file.arrayBuffer();
 		const buffer = Buffer.from(arrayBuffer);

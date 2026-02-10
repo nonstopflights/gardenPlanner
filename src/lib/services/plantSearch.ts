@@ -295,42 +295,15 @@ async function searchWebForPlant(query: string): Promise<PlantSearchResult | nul
 	}
 }
 
-/** Ensure a directory exists in both static/ and build/client/ (for adapter-node production). */
-async function ensureImageDir(subpath: string): Promise<{ staticDir: string; buildDir: string | null }> {
-	const staticDir = join(process.cwd(), 'static', subpath);
-	if (!existsSync(staticDir)) {
-		await mkdir(staticDir, { recursive: true });
-	}
-	const buildDir = join(process.cwd(), 'build', 'client', subpath);
-	if (existsSync(join(process.cwd(), 'build', 'client'))) {
-		if (!existsSync(buildDir)) {
-			await mkdir(buildDir, { recursive: true });
-		}
-		return { staticDir, buildDir };
-	}
-	return { staticDir, buildDir: null };
-}
-
-/** Copy a file to the build/client dir so adapter-node serves it immediately. */
-async function copyToBuild(filename: string, subpath: string, buildDir: string | null) {
-	if (!buildDir) return;
-	const { copyFile } = await import('fs/promises');
-	const src = join(process.cwd(), 'static', subpath, filename);
-	const dest = join(buildDir, filename);
-	try {
-		await copyFile(src, dest);
-	} catch {
-		// Non-fatal — next build will pick it up from static/
-	}
-}
-
 export async function downloadAndSavePlantImage(
 	imageUrl: string,
 	plantId: number
 ): Promise<string | null> {
 	try {
-		const subpath = join('plant-images', 'web');
-		const { staticDir, buildDir } = await ensureImageDir(subpath);
+		const webDir = join(process.cwd(), 'static', 'plant-images', 'web');
+		if (!existsSync(webDir)) {
+			await mkdir(webDir, { recursive: true });
+		}
 
 		// Download image
 		const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 10000 });
@@ -340,17 +313,14 @@ export async function downloadAndSavePlantImage(
 		const timestamp = Date.now();
 		const ext = imageUrl.split('.').pop()?.split('?')[0] || 'jpg';
 		const filename = `${plantId}_web_${timestamp}.${ext}`;
-		const filepath = join(staticDir, filename);
-		const relativePath = `/plant-images/web/${filename}`;
+		const filepath = join(webDir, filename);
+		const relativePath = `/api/serve-image/plant-images/web/${filename}`;
 
 		// Resize and save
 		await sharp(buffer)
 			.resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
 			.jpeg({ quality: 85 })
 			.toFile(filepath);
-
-		// Also copy to build/client so production serves it immediately
-		await copyToBuild(filename, subpath, buildDir);
 
 		// Save to database
 		await queries.addPlantImage({

@@ -32,4 +32,26 @@ try {
 	// Don't throw - allow the app to continue, but log the error
 }
 
+// Migrate image paths to use API route instead of static file serving
+try {
+	const plantUpdated = sqlite
+		.prepare(
+			`UPDATE plant_images SET image_path = '/api/serve-image' || image_path WHERE image_path LIKE '/plant-images/%'`
+		)
+		.run();
+	if (plantUpdated.changes > 0) {
+		console.log(`Migrated ${plantUpdated.changes} plant image paths to API route`);
+	}
+	const journalUpdated = sqlite
+		.prepare(
+			`UPDATE journal_images SET image_path = '/api/serve-image' || image_path WHERE image_path LIKE '/journal-images/%'`
+		)
+		.run();
+	if (journalUpdated.changes > 0) {
+		console.log(`Migrated ${journalUpdated.changes} journal image paths to API route`);
+	}
+} catch {
+	// Tables may not exist yet on first run
+}
+
 export { sqlite };
