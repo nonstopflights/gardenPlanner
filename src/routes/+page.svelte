@@ -65,11 +65,14 @@
 	</div>
 {:else}
 	<!-- Page title + active season subtitle -->
-	<div class="mb-6">
-		<h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
-		<p class="mt-1 text-sm text-slate-500">
-			{$activeSeason?.name ?? 'No active season'}
-		</p>
+	<div class="mb-6 flex items-center gap-4">
+		<img src="/logo.png" alt="Garden Planner" class="h-12 w-12" />
+		<div>
+			<h1 class="text-2xl font-bold text-slate-900">Dashboard</h1>
+			<p class="mt-1 text-sm text-slate-500">
+				{$activeSeason?.name ?? 'No active season'}
+			</p>
+		</div>
 	</div>
 
 	<!-- Stat cards -->

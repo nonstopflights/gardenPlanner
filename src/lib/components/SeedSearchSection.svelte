@@ -8,7 +8,7 @@
 
 	let { initialQuery = '', onApplyData }: Props = $props();
 
-	let expanded = $state(false);
+	let expanded = $state(true);
 	let searchQuery = $state(initialQuery);
 	let searching = $state(false);
 	let result: PlantLookupResult | null = $state(null);
