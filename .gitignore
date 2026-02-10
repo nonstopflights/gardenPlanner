@@ -12,13 +12,6 @@ node_modules
 .DS_Store
 Thumbs.db
 
-# Database
-database/
-
-# Uploaded images
-static/plant-images/
-static/journal-images/
-
 # Env
 .env
 .env.*
