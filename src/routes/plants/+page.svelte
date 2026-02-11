@@ -26,6 +26,21 @@
 			}
 		}
 		plantImages = imagesMap;
+
+		// Auto-classify untagged plants in background
+		const hasUntagged = plants.some((p) => !p.plantType);
+		if (hasUntagged) {
+			fetch('/api/plants/classify', { method: 'POST' }).then(async (classifyRes) => {
+				if (classifyRes.ok) {
+					const result = await classifyRes.json();
+					if (result.classified > 0) {
+						// Reload to show new types
+						const refreshRes = await fetch('/api/plants');
+						plants = await refreshRes.json();
+					}
+				}
+			});
+		}
 	}
 
 	function handlePlantClick(plant: Plant) {

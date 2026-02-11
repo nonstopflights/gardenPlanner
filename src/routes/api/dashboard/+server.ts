@@ -7,12 +7,13 @@ export const GET: RequestHandler = async ({ url }) => {
 		const seasonIdParam = url.searchParams.get('seasonId');
 		const seasonId = seasonIdParam ? parseInt(seasonIdParam) : undefined;
 		
-		const [activeSeason, plants, beds, recentJournal, recentActivities] = await Promise.all([
+		const [activeSeason, plants, beds, recentJournal, recentActivities, plantImageMap] = await Promise.all([
 			seasonId ? queries.getSeasonById(seasonId) : queries.getActiveSeason(),
 			queries.getAllPlants(),
 			queries.getAllBeds(),
 			queries.getRecentJournalEntries(5, seasonId),
-			queries.getRecentActivities(10, seasonId)
+			queries.getRecentActivities(10, seasonId),
+			queries.getAllPlantFirstImages()
 		]);
 
 		const totalPlants = plants.length;
@@ -44,6 +45,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				totalBeds
 			},
 			plants,
+			plantImageMap,
 			recentJournal,
 			recentActivities,
 			upcomingHarvests

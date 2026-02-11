@@ -7,14 +7,15 @@
 
 	interface Props {
 		plantName: string;
+		plantVariety?: string;
 		plantId?: number;
 		onSelect: (imagePath: string) => void;
 		onClose: () => void;
 	}
 
-	let { plantName, plantId, onSelect, onClose }: Props = $props();
+	let { plantName, plantVariety, plantId, onSelect, onClose }: Props = $props();
 
-	let searchQuery = $state(plantName);
+	let searchQuery = $state(plantVariety ? `${plantName} ${plantVariety}` : plantName);
 	let images: ImageCandidate[] = $state([]);
 	let searching = $state(false);
 	let downloading = $state(false);

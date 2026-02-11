@@ -20,6 +20,8 @@
 		name: '',
 		variety: '',
 		category: 'want' as 'past' | 'want' | 'current',
+		plantType: '',
+		haveSeeds: false,
 		plantingDate: '',
 		harvestDate: '',
 		spacing: '',
@@ -54,6 +56,7 @@
 		if (data.name) { formData.name = data.name; flashField('name'); }
 		if (data.variety) { formData.variety = data.variety; flashField('variety'); }
 		if (data.category) { formData.category = data.category; flashField('category'); }
+		if (data.plantType) { formData.plantType = data.plantType; flashField('plantType'); }
 		if (data.spacing) { formData.spacing = data.spacing; flashField('spacing'); }
 		if (data.sunRequirements) { formData.sunRequirements = data.sunRequirements; flashField('sunRequirements'); }
 		if (data.waterNeeds) { formData.waterNeeds = data.waterNeeds; flashField('waterNeeds'); }
@@ -97,6 +100,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					...formData,
+					plantType: formData.plantType || null,
 					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 					plantingSeason: formData.plantingSeason || null,
@@ -211,6 +215,21 @@
 				<option value="want">Want to Plant</option>
 				<option value="current">Currently Planted</option>
 			</select>
+		</div>
+		<div>
+			<label class="mb-1 block text-sm font-medium text-slate-700">Plant Type</label>
+			<input
+				type="text"
+				bind:value={formData.plantType}
+				placeholder="e.g., Pepper, Tomato, Flower"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400{fc('plantType')}"
+			/>
+		</div>
+		<div class="flex items-end">
+			<label class="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm cursor-pointer hover:bg-slate-50 transition">
+				<input type="checkbox" bind:checked={formData.haveSeeds} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+				Have Seeds
+			</label>
 		</div>
 		{#if showDates}
 			<div>
@@ -423,6 +442,7 @@
 {#if showImagePicker}
 	<ImagePickerModal
 		plantName={formData.name}
+		plantVariety={formData.variety || undefined}
 		onSelect={handleImageSelect}
 		onClose={() => (showImagePicker = false)}
 	/>

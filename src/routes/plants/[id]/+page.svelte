@@ -29,6 +29,8 @@
 		name: '',
 		variety: '',
 		category: 'want' as 'past' | 'want' | 'current',
+		plantType: '',
+		haveSeeds: false,
 		plantingDate: '',
 		harvestDate: '',
 		spacing: '',
@@ -72,6 +74,8 @@
 				name: plant!.name || '',
 				variety: plant!.variety || '',
 				category: (plant!.category as 'past' | 'want' | 'current') || 'want',
+				plantType: plant!.plantType || '',
+				haveSeeds: plant!.haveSeeds ?? false,
 				plantingDate: plant!.plantingDate || '',
 				harvestDate: plant!.harvestDate || '',
 				spacing: plant!.spacing || '',
@@ -128,6 +132,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					...formData,
+					plantType: formData.plantType || null,
 					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 					plantingSeason: formData.plantingSeason || null,
@@ -228,6 +233,7 @@
 		if (data.name) formData.name = data.name;
 		if (data.variety) formData.variety = data.variety;
 		if (data.category) formData.category = data.category;
+		if (data.plantType) formData.plantType = data.plantType;
 		if (data.plantingDate) { formData.plantingDate = data.plantingDate; showDates = true; }
 		if (data.harvestDate) { formData.harvestDate = data.harvestDate; showDates = true; }
 		if (data.spacing) formData.spacing = data.spacing;
@@ -409,6 +415,21 @@
 					<option value="want">Want to Plant</option>
 					<option value="current">Currently Planted</option>
 				</select>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Plant Type</label>
+				<input
+					type="text"
+					bind:value={formData.plantType}
+					placeholder="e.g., Pepper, Tomato, Flower"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				/>
+			</div>
+			<div class="flex items-end">
+				<label class="flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm cursor-pointer hover:bg-slate-50 transition">
+					<input type="checkbox" bind:checked={formData.haveSeeds} class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500" />
+					Have Seeds
+				</label>
 			</div>
 			{#if showDates}
 				<div>
@@ -638,9 +659,21 @@
 					{#if plant.variety}
 						<p class="mt-0.5 text-sm sm:text-base text-slate-500">{plant.variety}</p>
 					{/if}
-					<span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
-						{plant.category === 'want' ? 'Want to Plant' : plant.category}
-					</span>
+					<div class="mt-2 flex flex-wrap items-center gap-1.5">
+						<span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
+							{plant.category === 'want' ? 'Want to Plant' : plant.category}
+						</span>
+						{#if plant.plantType}
+							<span class="inline-block rounded-full border border-purple-200 bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+								{plant.plantType}
+							</span>
+						{/if}
+						{#if plant.haveSeeds}
+							<span class="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+								Have Seeds
+							</span>
+						{/if}
+					</div>
 				</div>
 				<div class="mt-3 flex flex-wrap gap-2">
 					<button
@@ -963,6 +996,7 @@
 {#if showImagePicker && plant}
 	<ImagePickerModal
 		plantName={plant.name}
+		plantVariety={plant.variety ?? undefined}
 		plantId={plant.id}
 		onSelect={handleImageSelect}
 		onClose={() => (showImagePicker = false)}

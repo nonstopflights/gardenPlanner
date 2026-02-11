@@ -50,6 +50,20 @@
       "when": 1770675768041,
       "tag": "0006_careless_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1770820703114,
+      "tag": "0007_lush_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1770820939778,
+      "tag": "0008_foamy_trauma",
+      "breakpoints": true
     }
   ]
 }

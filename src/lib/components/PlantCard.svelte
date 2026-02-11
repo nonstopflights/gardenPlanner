@@ -96,11 +96,25 @@
 				{plant.category}
 			</span>
 		{/if}
+		{#if plant.plantType}
+			<span
+				class="rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-purple-700"
+			>
+				{plant.plantType}
+			</span>
+		{/if}
 		{#if heightSize}
 			<span
 				class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide {heightSize.class}"
 			>
 				{heightSize.label}
+			</span>
+		{/if}
+		{#if plant.haveSeeds}
+			<span
+				class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700"
+			>
+				Have Seeds
 			</span>
 		{/if}
 	</div>

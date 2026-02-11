@@ -17,6 +17,7 @@ export interface PlantLookupResult {
 	name: string;
 	variety: string | null;
 	category: 'want' | 'current' | 'past';
+	plantType: string | null;
 	plantingDate: string | null;
 	harvestDate: string | null;
 	daysToMaturity: number | null;
@@ -36,6 +37,12 @@ export interface PlantLookupResult {
 	seedCost: number | null;
 }
 
+export const PLANT_TYPES = [
+	'Tomato', 'Pepper', 'Onion', 'Squash', 'Bean', 'Pea', 'Lettuce', 'Greens',
+	'Herb', 'Flower', 'Root Vegetable', 'Brassica', 'Cucumber', 'Melon',
+	'Corn', 'Berry', 'Fruit Tree', 'Other'
+] as const;
+
 const PLANT_JSON_SCHEMA = {
 	type: 'object',
 	additionalProperties: false,
@@ -43,6 +50,7 @@ const PLANT_JSON_SCHEMA = {
 		'name',
 		'variety',
 		'category',
+		'plant_type',
 		'planting_season',
 		'planting_schedule',
 		'growing_details',
@@ -54,6 +62,11 @@ const PLANT_JSON_SCHEMA = {
 		category: {
 			type: 'string',
 			enum: ['Want to Plant', 'Planted', 'Harvested', 'Archived']
+		},
+		plant_type: {
+			type: 'string',
+			enum: ['Tomato', 'Pepper', 'Onion', 'Squash', 'Bean', 'Pea', 'Lettuce', 'Greens', 'Herb', 'Flower', 'Root Vegetable', 'Brassica', 'Cucumber', 'Melon', 'Corn', 'Berry', 'Fruit Tree', 'Other'],
+			description: 'The general type/category of this plant'
 		},
 		planting_date: { type: ['string', 'null'], description: 'YYYY-MM-DD' },
 		harvest_date: { type: ['string', 'null'], description: 'YYYY-MM-DD' },
@@ -204,6 +217,7 @@ ${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
 			name: data.name || query,
 			variety: data.variety || null,
 			category: categoryMap[data.category] || 'want',
+			plantType: data.plant_type || null,
 			plantingDate: data.planting_date || null,
 			harvestDate: data.harvest_date || null,
 			daysToMaturity: typeof data.days_to_maturity === 'number' ? data.days_to_maturity : null,
@@ -239,6 +253,55 @@ ${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
 	} catch (error) {
 		console.error('[OpenAI] Plant data lookup failed:', error);
 		return null;
+	}
+}
+
+export async function classifyPlantTypes(
+	plantsToClassify: { id: number; name: string; variety: string | null }[]
+): Promise<Record<number, string>> {
+	const openai = getClient();
+	if (!openai || plantsToClassify.length === 0) return {};
+
+	try {
+		const plantList = plantsToClassify
+			.map((p) => `${p.id}: ${p.name}${p.variety ? ` (${p.variety})` : ''}`)
+			.join('\n');
+
+		const response = await openai.chat.completions.create({
+			model: 'gpt-4o',
+			response_format: { type: 'json_object' },
+			messages: [
+				{
+					role: 'system',
+					content: `You are a plant classification assistant. Given a list of plant names, classify each into exactly one of these types: ${PLANT_TYPES.join(', ')}.
+Return ONLY a JSON object mapping each plant ID to its type string. Example: {"1": "Tomato", "2": "Flower"}`
+				},
+				{
+					role: 'user',
+					content: `Classify these plants:\n${plantList}`
+				}
+			],
+			temperature: 0.1,
+			max_tokens: 2000
+		});
+
+		const content = response.choices[0]?.message?.content;
+		if (!content) return {};
+
+		const data = JSON.parse(content);
+		const result: Record<number, string> = {};
+		for (const [idStr, type] of Object.entries(data)) {
+			const id = parseInt(idStr);
+			if (!isNaN(id) && typeof type === 'string') {
+				result[id] = type;
+			}
+		}
+
+		console.log('[OpenAI] Plant classification result:', JSON.stringify(result, null, 2));
+		return result;
+	} catch (error) {
+		console.error('[OpenAI] Plant classification failed:', error);
+		return {};
 	}
 }
 

@@ -52,6 +52,7 @@
 	let recentJournal = $derived(dashboardData?.recentJournal ?? []);
 	let upcomingHarvests = $derived(dashboardData?.upcomingHarvests ?? []);
 	let allPlants = $derived(dashboardData?.plants ?? []);
+	let plantImageMap: Record<number, string> = $derived(dashboardData?.plantImageMap ?? {});
 
 	function daysUntilHarvest(harvestDate: string): number {
 		const now = new Date();
@@ -248,6 +249,17 @@
 						class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 sm:px-4 py-2.5 transition-shadow hover:shadow-sm"
 					>
 						<div class="flex items-center gap-2.5 min-w-0 flex-1">
+							{#if plantImageMap[task.plantId]}
+								<img
+									src={plantImageMap[task.plantId]}
+									alt={task.plantName}
+									class="h-8 w-8 flex-shrink-0 rounded-md object-cover"
+								/>
+							{:else}
+								<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-slate-100 text-sm">
+									🌱
+								</div>
+							{/if}
 							<span
 								class="flex-shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold {task.badgeClass}"
 							>

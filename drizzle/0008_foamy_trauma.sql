@@ -1,0 +1,1 @@
+ALTER TABLE `plants` ADD `have_seeds` integer DEFAULT false NOT NULL;

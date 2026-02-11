@@ -182,6 +182,17 @@ export async function copyBedLayoutsToSeason(fromSeasonId: number, toSeasonId: n
 
 // --- Image queries ---
 
+export async function getAllPlantFirstImages(): Promise<Record<number, string>> {
+	const allImages = await db.select().from(plantImages).orderBy(plantImages.uploadedAt);
+	const imageMap: Record<number, string> = {};
+	for (const img of allImages) {
+		if (!imageMap[img.plantId]) {
+			imageMap[img.plantId] = img.imagePath;
+		}
+	}
+	return imageMap;
+}
+
 export async function getPlantImages(plantId: number) {
 	return db
 		.select()
