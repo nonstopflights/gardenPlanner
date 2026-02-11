@@ -432,8 +432,11 @@
 						onmouseleave={handleCircleMouseLeave}
 					>
 						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate" style="max-width: 90%;">
-							{plant?.name || 'Plant'}
+							{plant?.plantType || plant?.name || 'Plant'}
 						</div>
+						{#if plant?.variety}
+							<div class="text-[8px] sm:text-[9px] text-center px-1 text-slate-500 truncate" style="max-width: 90%;">{plant.variety}</div>
+						{/if}
 						{#if hs}
 							<div class="text-[8px] sm:text-[9px] font-bold {hs.text}">{hs.label === 'S' ? 'Short' : hs.label === 'M' ? 'Med' : 'Tall'}</div>
 						{/if}
