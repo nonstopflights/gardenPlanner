@@ -100,6 +100,15 @@ export async function getBedWithPlants(bedId: number, seasonId?: number) {
 	};
 }
 
+export async function updateBed(id: number, data: Partial<typeof beds.$inferInsert>) {
+	const result = await db
+		.update(beds)
+		.set(data)
+		.where(eq(beds.id, id))
+		.returning();
+	return result[0] || null;
+}
+
 // --- Bed-Plant relationship queries ---
 
 export async function addPlantToBed(

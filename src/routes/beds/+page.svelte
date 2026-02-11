@@ -139,6 +139,22 @@
 		goto(`/plants/${plant.id}`);
 	}
 
+	async function handleBedUpdate(bedId: number, data: { caption?: string }) {
+		try {
+			const res = await fetch(`/api/beds/${bedId}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data)
+			});
+			if (res.ok) {
+				const updated = await res.json();
+				beds = beds.map((b) => (b.id === bedId ? { ...b, ...updated } : b));
+			}
+		} catch (error) {
+			console.error('Failed to update bed:', error);
+		}
+	}
+
 	function handleBedPlantClick(bedId: number, plantId: number, zone: string) {
 		spotModalData = { plantId, bedId, zone };
 	}
@@ -184,6 +200,7 @@
 	onPlantMove={handlePlantMove}
 	onPlantRemove={handlePlantRemove}
 	onPlantClick={handleBedPlantClick}
+	onBedUpdate={handleBedUpdate}
 />
 
 {#if spotModalData}

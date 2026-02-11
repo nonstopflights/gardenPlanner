@@ -18,3 +18,16 @@ export const GET: RequestHandler = async ({ params, url }) => {
 	}
 	return json(bed);
 };
+
+export const PATCH: RequestHandler = async ({ params, request }) => {
+	const id = parseInt(params.id);
+	if (isNaN(id)) {
+		throw error(400, 'Invalid bed ID');
+	}
+	const data = await request.json();
+	const bed = await queries.updateBed(id, data);
+	if (!bed) {
+		throw error(404, 'Bed not found');
+	}
+	return json(bed);
+};

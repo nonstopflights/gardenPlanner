@@ -1,0 +1,1 @@
+ALTER TABLE `beds` ADD `caption` text;

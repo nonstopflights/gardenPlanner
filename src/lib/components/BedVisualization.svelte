@@ -10,9 +10,31 @@
 		onPlantMove: (bedPlantId: number, posX: number, posY: number) => Promise<void> | void;
 		onPlantRemove: (bedPlantId: number) => Promise<void> | void;
 		onPlantClick?: (bedId: number, plantId: number, zone: string) => void;
+		onBedUpdate?: (bedId: number, data: { caption?: string }) => Promise<void> | void;
 	}
 
-	let { beds, plants, bedPlants, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick }: Props = $props();
+	let { beds, plants, bedPlants, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick, onBedUpdate }: Props = $props();
+
+	// Caption editing state
+	let editingCaptionBedId: number | null = $state(null);
+	let editingCaptionValue = $state('');
+
+	function startEditCaption(bed: Bed) {
+		editingCaptionBedId = bed.id;
+		editingCaptionValue = bed.caption || '';
+	}
+
+	function saveCaption(bedId: number) {
+		const trimmed = editingCaptionValue.trim();
+		onBedUpdate?.(bedId, { caption: trimmed || undefined });
+		editingCaptionBedId = null;
+		editingCaptionValue = '';
+	}
+
+	function cancelEditCaption() {
+		editingCaptionBedId = null;
+		editingCaptionValue = '';
+	}
 
 	// Drag state for repositioning circles
 	let draggingBp: BedPlant | null = $state(null);
@@ -169,23 +191,41 @@
 		return { x: bp.posX, y: bp.posY };
 	}
 
-	function getHeightSize(matureHeight: string | null | undefined): { label: string; border: string; text: string; bg: string } | null {
-		if (!matureHeight) return null;
-		const text = matureHeight.toLowerCase().trim();
-		const numbers = [...text.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
+	function parseInches(value: string | null | undefined): number | null {
+		if (!value) return null;
+		const t = value.toLowerCase().trim();
+		const numbers = [...t.matchAll(/(\d+(?:\.\d+)?)/g)].map(m => parseFloat(m[1]));
 		if (numbers.length === 0) return null;
+		// Use the max number for sizing (e.g. "12-18 inches" → 18)
 		const maxNum = Math.max(...numbers);
-		let maxInches = 0;
 
-		if (text.includes('feet') || text.includes('foot') || text.includes('ft') || text.includes("'")) {
-			maxInches = maxNum * 12;
-		} else if (text.includes('inch') || text.includes('in') || text.includes('"')) {
-			maxInches = maxNum;
-		} else if (text.includes('cm')) {
-			maxInches = maxNum / 2.54;
+		if (t.includes('feet') || t.includes('foot') || t.includes('ft') || t.includes("'")) {
+			return maxNum * 12;
+		} else if (t.includes('inch') || t.includes('in') || t.includes('"')) {
+			return maxNum;
+		} else if (t.includes('cm')) {
+			return maxNum / 2.54;
 		} else {
-			maxInches = maxNum > 12 ? maxNum : maxNum * 12;
+			// Plain number — assume inches if ≤ 48, otherwise already inches
+			return maxNum;
 		}
+	}
+
+	const DEFAULT_CIRCLE_PCT = 18; // fallback when no spacing data
+	const MIN_CIRCLE_PCT = 8;
+	const MAX_CIRCLE_PCT = 45;
+
+	function getCirclePct(plant: Plant | undefined, bed: Bed): number {
+		const spacingInches = parseInches(plant?.spacing);
+		if (!spacingInches) return DEFAULT_CIRCLE_PCT;
+		const bedWidthInches = bed.width * 12;
+		const pct = (spacingInches / bedWidthInches) * 100;
+		return clamp(pct, MIN_CIRCLE_PCT, MAX_CIRCLE_PCT);
+	}
+
+	function getHeightSize(matureHeight: string | null | undefined): { label: string; border: string; text: string; bg: string } | null {
+		const maxInches = parseInches(matureHeight);
+		if (!maxInches) return null;
 
 		if (maxInches <= 24) {
 			return { label: 'S', border: 'border-amber-400', text: 'text-amber-600', bg: 'bg-amber-50' };
@@ -206,11 +246,33 @@
 	{#each beds as bed (bed.id)}
 		{@const bps = bedPlants[bed.id] || []}
 		<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-			<div class="flex items-center justify-between">
-				<h3 class="text-base font-semibold text-slate-900">{bed.name}</h3>
+			<div class="flex items-center justify-between gap-2">
+				<h3 class="shrink-0 text-base font-semibold text-slate-900">{bed.name}</h3>
+				{#if editingCaptionBedId === bed.id}
+					<input
+						type="text"
+						bind:value={editingCaptionValue}
+						placeholder="e.g. Back fence, Raised box..."
+						class="min-w-0 flex-1 rounded border border-slate-300 px-2 py-0.5 text-sm text-slate-600 placeholder-slate-300 focus:border-slate-400 focus:outline-none"
+						autofocus
+						onkeydown={(e) => {
+							if (e.key === 'Enter') saveCaption(bed.id);
+							if (e.key === 'Escape') cancelEditCaption();
+						}}
+						onblur={() => saveCaption(bed.id)}
+					/>
+				{:else}
+					<button
+						onclick={() => startEditCaption(bed)}
+						class="min-w-0 flex-1 truncate text-left text-sm text-slate-400 transition hover:text-slate-600 {bed.caption ? 'text-slate-500' : 'italic'}"
+						title="Click to edit caption"
+					>
+						{bed.caption || 'Add caption...'}
+					</button>
+				{/if}
 				<button
 					onclick={() => togglePicker(bed.id)}
-					class="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
+					class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-500 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-700"
 					aria-label="Add plant to bed"
 				>
 					+
@@ -269,16 +331,17 @@
 					{@const pos = getBpPosition(bp)}
 					{@const isDragging = draggingBp?.id === bp.id}
 					{@const hs = getHeightSize(plant?.matureHeight)}
+					{@const sizePct = getCirclePct(plant, bed)}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
 					<div
-						class="absolute flex flex-col items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 shadow-sm select-none transition-shadow {isDragging ? 'shadow-md border-slate-500 z-20 cursor-grabbing' : hs ? hs.border + ' z-10 cursor-grab hover:shadow-md' : 'border-slate-300 z-10 cursor-grab hover:shadow-md hover:border-slate-400'} {hs ? hs.bg : 'bg-white'}"
-						style="left: {pos.x}%; top: {pos.y}%; transform: translate(-50%, -50%);"
+						class="absolute flex flex-col items-center justify-center rounded-full border-2 shadow-sm select-none transition-shadow {isDragging ? 'shadow-md border-slate-500 z-20 cursor-grabbing' : hs ? hs.border + ' z-10 cursor-grab hover:shadow-md' : 'border-slate-300 z-10 cursor-grab hover:shadow-md hover:border-slate-400'} {hs ? hs.bg : 'bg-white'}"
+						style="left: {pos.x}%; top: {pos.y}%; width: {sizePct}%; aspect-ratio: 1; transform: translate(-50%, -50%);"
 						onpointerdown={(e) => {
 							const bedEl = (e.currentTarget as HTMLElement).parentElement;
 							if (bedEl) handlePointerDown(e, bp, bedEl);
 						}}
 					>
-						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate max-w-[3.5rem] sm:max-w-[4.5rem]">
+						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate" style="max-width: 90%;">
 							{plant?.name || 'Plant'}
 						</div>
 						{#if hs}

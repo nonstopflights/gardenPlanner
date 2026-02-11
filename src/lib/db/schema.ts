@@ -49,6 +49,7 @@ export const plants = sqliteTable('plants', {
 export const beds = sqliteTable('beds', {
 	id: integer('id').primaryKey({ autoIncrement: true }),
 	name: text('name').notNull(),
+	caption: text('caption'),
 	width: real('width').notNull().default(4),
 	height: real('height').notNull().default(8),
 	cornerRadius: real('corner_radius').notNull().default(0.5)
