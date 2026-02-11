@@ -228,6 +228,11 @@
 		</div>
 	</div>
 
+	<!-- Header image -->
+	<div class="mb-8 overflow-hidden rounded-2xl">
+		<img src="/header.png" alt="Garden" class="w-full object-cover" />
+	</div>
+
 	<!-- To Do This Week -->
 	<div class="mb-8 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 		<div class="mb-4 flex items-center justify-between">
