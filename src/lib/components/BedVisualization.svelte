@@ -6,6 +6,7 @@
 		beds: Bed[];
 		plants: Plant[];
 		bedPlants: Record<number, BedPlant[]>;
+		plantImages?: Record<number, string>;
 		onPlantAdd: (bedId: number, plantId: number, posX: number, posY: number) => Promise<void> | void;
 		onPlantMove: (bedPlantId: number, posX: number, posY: number) => Promise<void> | void;
 		onPlantRemove: (bedPlantId: number) => Promise<void> | void;
@@ -13,7 +14,7 @@
 		onBedUpdate?: (bedId: number, data: { caption?: string }) => Promise<void> | void;
 	}
 
-	let { beds, plants, bedPlants, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick, onBedUpdate }: Props = $props();
+	let { beds, plants, bedPlants, plantImages = {}, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick, onBedUpdate }: Props = $props();
 
 	// Caption editing state
 	let editingCaptionBedId: number | null = $state(null);
@@ -235,6 +236,91 @@
 			return { label: 'T', border: 'border-rose-400', text: 'text-rose-600', bg: 'bg-rose-50' };
 		}
 	}
+
+	// --- Hover tooltip ---
+	let hoverPlant: Plant | null = $state(null);
+	let hoverPos: { x: number; y: number } | null = $state(null);
+	let hoverTimer: ReturnType<typeof setTimeout> | null = $state(null);
+
+	function handleCircleMouseEnter(e: MouseEvent, plant: Plant | undefined) {
+		if (!plant) return;
+		clearHover();
+		hoverTimer = setTimeout(() => {
+			hoverPlant = plant;
+			hoverPos = { x: e.clientX, y: e.clientY };
+		}, 1000);
+	}
+
+	function handleCircleMouseMove(e: MouseEvent) {
+		if (hoverPlant) {
+			hoverPos = { x: e.clientX, y: e.clientY };
+		}
+	}
+
+	let tooltipStyle = $derived.by(() => {
+		if (!hoverPos) return '';
+		const pad = 12;
+		const w = 256; // w-64
+		const h = 220; // rough estimate for image + text
+		let x = hoverPos.x + pad;
+		let y = hoverPos.y + pad;
+		if (typeof window !== 'undefined') {
+			if (x + w > window.innerWidth - pad) x = hoverPos.x - w - pad;
+			if (y + h > window.innerHeight - pad) y = hoverPos.y - h - pad;
+		}
+		return `left: ${x}px; top: ${y}px;`;
+	});
+
+	function handleCircleMouseLeave() {
+		clearHover();
+	}
+
+	function clearHover() {
+		if (hoverTimer) {
+			clearTimeout(hoverTimer);
+			hoverTimer = null;
+		}
+		hoverPlant = null;
+		hoverPos = null;
+	}
+
+	function buildSummary(plant: Plant): string {
+		const sentences: string[] = [];
+
+		// Sentence 1: What it is
+		let s1 = plant.name;
+		if (plant.variety) s1 += ` (${plant.variety})`;
+		if (plant.plantType) s1 += ` is a ${plant.plantType.toLowerCase()}`;
+		if (plant.matureHeight) s1 += ` that grows ${plant.matureHeight} tall`;
+		s1 += '.';
+		sentences.push(s1);
+
+		// Sentence 2: Growing needs
+		const needs: string[] = [];
+		if (plant.sunRequirements) needs.push(plant.sunRequirements.toLowerCase() + ' sun');
+		if (plant.waterNeeds) needs.push(plant.waterNeeds.toLowerCase() + ' water');
+		if (plant.spacing) needs.push(plant.spacing + ' spacing');
+		if (needs.length > 0) {
+			sentences.push(`Needs ${needs.join(', ')}.`);
+		} else if (plant.daysToMaturity) {
+			sentences.push(`Matures in ${plant.daysToMaturity} days.`);
+		}
+
+		// Sentence 3: Maturity / harvest info
+		if (plant.daysToMaturity && needs.length > 0) {
+			sentences.push(`Matures in about ${plant.daysToMaturity} days.`);
+		} else if (plant.growingNotes) {
+			// Grab first sentence of growing notes
+			const first = plant.growingNotes.replace(/<[^>]*>/g, '').split(/[.!]\s/)[0];
+			if (first && first.length < 120) sentences.push(first + '.');
+		}
+
+		if (sentences.length < 2 && plant.plantingSeason) {
+			sentences.push(`Best planted in ${plant.plantingSeason}.`);
+		}
+
+		return sentences.slice(0, 3).join(' ');
+	}
 </script>
 
 <svelte:window
@@ -337,9 +423,13 @@
 						class="absolute flex flex-col items-center justify-center rounded-full border-2 shadow-sm select-none transition-shadow {isDragging ? 'shadow-md border-slate-500 z-20 cursor-grabbing' : hs ? hs.border + ' z-10 cursor-grab hover:shadow-md' : 'border-slate-300 z-10 cursor-grab hover:shadow-md hover:border-slate-400'} {hs ? hs.bg : 'bg-white'}"
 						style="left: {pos.x}%; top: {pos.y}%; width: {sizePct}%; aspect-ratio: 1; transform: translate(-50%, -50%);"
 						onpointerdown={(e) => {
+							clearHover();
 							const bedEl = (e.currentTarget as HTMLElement).parentElement;
 							if (bedEl) handlePointerDown(e, bp, bedEl);
 						}}
+						onmouseenter={(e) => handleCircleMouseEnter(e, plant)}
+						onmousemove={handleCircleMouseMove}
+						onmouseleave={handleCircleMouseLeave}
 					>
 						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate" style="max-width: 90%;">
 							{plant?.name || 'Plant'}
@@ -361,3 +451,20 @@
 		</div>
 	{/each}
 </div>
+
+{#if hoverPlant && hoverPos}
+	<div
+		class="fixed z-50 w-64 rounded-xl border border-slate-200 bg-white p-3 shadow-lg pointer-events-none"
+		style={tooltipStyle}
+	>
+		{#if plantImages[hoverPlant.id]}
+			<img
+				src={plantImages[hoverPlant.id]}
+				alt={hoverPlant.name}
+				class="mb-2 h-28 w-full rounded-lg object-cover"
+			/>
+		{/if}
+		<p class="text-sm font-semibold text-slate-900">{hoverPlant.name}</p>
+		<p class="mt-1 text-xs leading-relaxed text-slate-600">{buildSummary(hoverPlant)}</p>
+	</div>
+{/if}

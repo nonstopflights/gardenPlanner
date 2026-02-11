@@ -196,6 +196,7 @@
 	{beds}
 	{plants}
 	{bedPlants}
+	{plantImages}
 	onPlantAdd={handlePlantAdd}
 	onPlantMove={handlePlantMove}
 	onPlantRemove={handlePlantRemove}
