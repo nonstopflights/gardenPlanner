@@ -284,6 +284,24 @@
 		hoverPos = null;
 	}
 
+	// --- Double-tap for mobile ---
+	let lastTapTime = 0;
+	let lastTapBpId: number | null = null;
+	let tappedPlant: Plant | null = $state(null);
+
+	function handleDoubleTap(bp: { id: number }, plant: Plant | undefined) {
+		if (!plant) return;
+		const now = Date.now();
+		if (lastTapBpId === bp.id && now - lastTapTime < 400) {
+			tappedPlant = plant;
+			lastTapTime = 0;
+			lastTapBpId = null;
+		} else {
+			lastTapTime = now;
+			lastTapBpId = bp.id;
+		}
+	}
+
 	function buildSummary(plant: Plant): string {
 		const sentences: string[] = [];
 
@@ -430,6 +448,7 @@
 						onmouseenter={(e) => handleCircleMouseEnter(e, plant)}
 						onmousemove={handleCircleMouseMove}
 						onmouseleave={handleCircleMouseLeave}
+						ontouchend={() => handleDoubleTap(bp, plant)}
 					>
 						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate" style="max-width: 90%;">
 							{plant?.plantType || plant?.name || 'Plant'}
@@ -469,5 +488,36 @@
 		{/if}
 		<p class="text-sm font-semibold text-slate-900">{hoverPlant.name}</p>
 		<p class="mt-1 text-xs leading-relaxed text-slate-600">{buildSummary(hoverPlant)}</p>
+	</div>
+{/if}
+
+{#if tappedPlant}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+		onclick={() => (tappedPlant = null)}
+		onkeydown={(e) => { if (e.key === 'Escape') tappedPlant = null; }}
+	>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div
+			class="mx-4 w-full max-w-xs rounded-xl border border-slate-200 bg-white p-4 shadow-lg"
+			onclick={(e) => e.stopPropagation()}
+		>
+			{#if plantImages[tappedPlant.id]}
+				<img
+					src={plantImages[tappedPlant.id]}
+					alt={tappedPlant.name}
+					class="mb-3 h-36 w-full rounded-lg object-cover"
+				/>
+			{/if}
+			<p class="text-base font-semibold text-slate-900">{tappedPlant.name}</p>
+			<p class="mt-1 text-sm leading-relaxed text-slate-600">{buildSummary(tappedPlant)}</p>
+			<button
+				class="mt-3 w-full rounded-lg bg-slate-100 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-200"
+				onclick={() => (tappedPlant = null)}
+			>
+				Close
+			</button>
+		</div>
 	</div>
 {/if}
