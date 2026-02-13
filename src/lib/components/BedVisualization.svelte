@@ -284,21 +284,22 @@
 		hoverPos = null;
 	}
 
-	// --- Double-tap for mobile ---
-	let lastTapTime = 0;
-	let lastTapBpId: number | null = null;
+	// --- Long-press for mobile ---
 	let tappedPlant: Plant | null = $state(null);
+	let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 
-	function handleDoubleTap(bp: { id: number }, plant: Plant | undefined) {
+	function handleTouchStart(plant: Plant | undefined) {
 		if (!plant) return;
-		const now = Date.now();
-		if (lastTapBpId === bp.id && now - lastTapTime < 400) {
+		longPressTimer = setTimeout(() => {
 			tappedPlant = plant;
-			lastTapTime = 0;
-			lastTapBpId = null;
-		} else {
-			lastTapTime = now;
-			lastTapBpId = bp.id;
+			longPressTimer = null;
+		}, 1000);
+	}
+
+	function handleTouchEnd() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = null;
 		}
 	}
 
@@ -448,7 +449,9 @@
 						onmouseenter={(e) => handleCircleMouseEnter(e, plant)}
 						onmousemove={handleCircleMouseMove}
 						onmouseleave={handleCircleMouseLeave}
-						ontouchend={() => handleDoubleTap(bp, plant)}
+						ontouchstart={() => handleTouchStart(plant)}
+						ontouchend={handleTouchEnd}
+						ontouchmove={handleTouchEnd}
 					>
 						<div class="text-[10px] sm:text-xs text-center px-1 font-semibold text-slate-900 truncate" style="max-width: 90%;">
 							{plant?.plantType || plant?.name || 'Plant'}

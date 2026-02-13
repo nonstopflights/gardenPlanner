@@ -7,9 +7,10 @@
 		images: Record<number, string>;
 		onPlantClick: (plant: Plant) => void;
 		onAddPlant: () => void;
+		onFilteredChange?: (filtered: Plant[]) => void;
 	}
 
-	let { plants, images, onPlantClick, onAddPlant }: Props = $props();
+	let { plants, images, onPlantClick, onAddPlant, onFilteredChange }: Props = $props();
 
 	let searchQuery = $state('');
 	let selectedCategory = $state<'all' | 'past' | 'want' | 'current'>('all');
@@ -33,6 +34,10 @@
 			return matchesSearch && matchesCategory && matchesType;
 		})
 	);
+
+	$effect(() => {
+		onFilteredChange?.(filteredPlants);
+	});
 </script>
 
 <div class="p-4">

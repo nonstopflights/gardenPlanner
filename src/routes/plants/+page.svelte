@@ -7,6 +7,7 @@
 
 	let plants: Plant[] = $state([]);
 	let plantImages: Record<number, string> = $state({});
+	let calendarPlants: Plant[] = $state([]);
 
 	onMount(async () => {
 		await loadData();
@@ -68,9 +69,10 @@
 	images={plantImages}
 	onPlantClick={handlePlantClick}
 	onAddPlant={() => goto('/plants/new')}
+	onFilteredChange={(filtered) => (calendarPlants = filtered)}
 />
 
 <!-- Planting Calendar -->
 <div class="mt-8">
-	<PlantingCalendar {plants} />
+	<PlantingCalendar plants={calendarPlants} />
 </div>
