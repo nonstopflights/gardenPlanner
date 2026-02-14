@@ -121,12 +121,36 @@
 	<style>
 		@media print {
 			.no-print { display: none !important; }
-			body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+			@page { margin: 0.5in; }
+			body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; }
+			.print-content {
+				max-width: 100% !important;
+				padding: 0 !important;
+				margin: 0 !important;
+			}
+			.print-content .print-card {
+				border: none !important;
+				box-shadow: none !important;
+				border-radius: 0 !important;
+				background: none !important;
+				padding: 0 !important;
+			}
+			.print-content h1 { font-size: 12pt; margin: 0 0 2pt; }
+			.print-content .print-meta { font-size: 8pt; margin: 0 0 8pt; color: #000; }
+			.print-content section { margin-bottom: 8pt; }
+			.print-content .space-y-8 > * + * { margin-top: 8pt !important; }
+			.print-content h2 { font-size: 10pt; border-bottom: 1pt solid #000; padding-bottom: 2pt; margin: 0 0 4pt; }
+			.print-content table { font-size: 8pt; margin-top: 4pt; }
+			.print-content th,
+			.print-content td { padding: 1pt 4pt; border-color: #666; min-width: 0; }
+			.print-content th { font-size: 7pt; }
+			.print-content td { color: #000; }
+			.print-content [class*="text-slate"] { color: #000 !important; }
 		}
 	</style>
 </svelte:head>
 
-<div class="mx-auto max-w-5xl px-4 py-6">
+<div class="mx-auto max-w-5xl px-4 py-6 print-content">
 	<!-- Screen-only: back + print buttons -->
 	<div class="no-print mb-6 flex items-center justify-between">
 		<a
@@ -149,10 +173,10 @@
 	{#if loading}
 		<p class="py-12 text-center text-slate-500">Loading...</p>
 	{:else}
-		<div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+		<div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm print-card">
 			<h1 class="text-xl font-semibold text-slate-900">Bed Plan</h1>
-			<p class="mt-1 text-sm text-slate-500">{seasonName} · Lancaster, PA</p>
-			<p class="mt-1 text-xs text-slate-400">Last frost: April 28 · First frost: October 11</p>
+			<p class="mt-1 text-sm text-slate-500 print-meta">{seasonName} · Lancaster, PA</p>
+			<p class="mt-1 text-xs text-slate-400 print-meta">Last frost: April 28 · First frost: October 11</p>
 
 			<div class="mt-8 space-y-8">
 				{#each beds as bed (bed.id)}
