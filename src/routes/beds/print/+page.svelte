@@ -73,6 +73,20 @@
 		return '—';
 	}
 
+	function groupedByPlant(plants: BedPlant[]): { plant: Plant; qty: number }[] {
+		const map = new Map<number, { plant: Plant; qty: number }>();
+		for (const bp of plants) {
+			if (!bp.plant) continue;
+			const existing = map.get(bp.plant.id);
+			if (existing) {
+				existing.qty += 1;
+			} else {
+				map.set(bp.plant.id, { plant: bp.plant, qty: 1 });
+			}
+		}
+		return [...map.values()];
+	}
+
 	onMount(async () => {
 		const season = $activeSeason;
 		seasonName = season?.name ?? 'All seasons';
@@ -112,7 +126,7 @@
 	</style>
 </svelte:head>
 
-<div class="mx-auto max-w-3xl px-4 py-6">
+<div class="mx-auto max-w-5xl px-4 py-6">
 	<!-- Screen-only: back + print buttons -->
 	<div class="no-print mb-6 flex items-center justify-between">
 		<a
@@ -153,32 +167,33 @@
 						{#if bed.plants.length === 0}
 							<p class="mt-2 text-sm italic text-slate-400">No plants in this bed</p>
 						{:else}
-							<table class="mt-3 w-full text-sm">
+							{@const grouped = groupedByPlant(bed.plants)}
+							<table class="mt-3 w-full table-fixed text-sm">
 								<thead>
 									<tr class="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-										<th class="py-2 pr-4">Plant</th>
-										<th class="py-2 pr-4">Height</th>
-										<th class="py-2 pr-4">Spacing</th>
-										<th class="py-2 pr-4">When to plant</th>
-										<th class="py-2">Harvest</th>
+										<th class="w-12 py-2 pr-2 text-center">Qty</th>
+										<th class="min-w-[180px] py-2 pr-6">Plant</th>
+										<th class="min-w-[100px] py-2 pr-6">Height</th>
+										<th class="min-w-[100px] py-2 pr-6">Spacing</th>
+										<th class="min-w-[220px] py-2 pr-6">When to plant</th>
+										<th class="min-w-[140px] py-2">Harvest</th>
 									</tr>
 								</thead>
 								<tbody>
-									{#each bed.plants as bp (bp.id)}
-										{#if bp.plant}
-											<tr class="border-b border-slate-50">
-												<td class="py-2.5 pr-4 font-medium text-slate-900">
-													{bp.plant.name}
-													{#if bp.plant.variety}
-														<span class="text-slate-500"> — {bp.plant.variety}</span>
-													{/if}
-												</td>
-												<td class="py-2.5 pr-4 text-slate-600">{bp.plant.matureHeight ?? '—'}</td>
-												<td class="py-2.5 pr-4 text-slate-600">{bp.plant.spacing ?? '—'}</td>
-												<td class="py-2.5 pr-4 text-slate-600">{formatPlantingWhen(bp.plant)}</td>
-												<td class="py-2.5 text-slate-600">{formatHarvest(bp.plant)}</td>
-											</tr>
-										{/if}
+									{#each grouped as { plant, qty } (plant.id)}
+										<tr class="border-b border-slate-50">
+											<td class="py-2.5 pr-2 text-center font-medium text-slate-700">{qty}</td>
+											<td class="py-2.5 pr-6 font-medium text-slate-900">
+												{plant.name}
+												{#if plant.variety}
+													<span class="text-slate-500"> — {plant.variety}</span>
+												{/if}
+											</td>
+											<td class="py-2.5 pr-6 text-slate-600">{plant.matureHeight ?? '—'}</td>
+											<td class="py-2.5 pr-6 text-slate-600">{plant.spacing ?? '—'}</td>
+											<td class="py-2.5 pr-6 text-slate-600">{formatPlantingWhen(plant)}</td>
+											<td class="py-2.5 text-slate-600">{formatHarvest(plant)}</td>
+										</tr>
 									{/each}
 								</tbody>
 							</table>
