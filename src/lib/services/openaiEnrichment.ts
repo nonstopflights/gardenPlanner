@@ -13,6 +13,17 @@ function getClient(): OpenAI | null {
 	return client;
 }
 
+export type OpenAIModelId = 'gpt-5-mini' | 'gpt-4o-mini' | 'gpt-4o' | 'gpt-4.1';
+
+function normalizeModelId(value: unknown): OpenAIModelId {
+	if (typeof value !== 'string') return 'gpt-5-mini';
+	if (value === 'gpt-5-mini') return value;
+	if (value === 'gpt-4o-mini') return value;
+	if (value === 'gpt-4o') return value;
+	if (value === 'gpt-4.1') return value;
+	return 'gpt-5-mini';
+}
+
 export interface PlantLookupResult {
 	name: string;
 	variety: string | null;
@@ -155,11 +166,15 @@ For harvesting_notes, include when to harvest, signs of ripeness, how to pick, a
 For planting_season use "Spring", "Fall", or "Spring and Fall".
 For category always return "Want to Plant".`;
 
-export async function lookupPlantData(query: string): Promise<PlantLookupResult | null> {
+export async function lookupPlantData(
+	query: string,
+	model?: OpenAIModelId
+): Promise<PlantLookupResult | null> {
 	const openai = getClient();
 	if (!openai) return null;
 
 	try {
+		const modelId = normalizeModelId(model);
 		const userMessage = `Create an import-ready plant record for my garden planner app.
 
 Grower context:
@@ -179,7 +194,7 @@ Return JSON matching this schema:
 ${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-4o',
+			model: modelId,
 			response_format: { type: 'json_object' },
 			messages: [
 				{ role: 'system', content: SYSTEM_MESSAGE },
@@ -257,18 +272,20 @@ ${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
 }
 
 export async function classifyPlantTypes(
-	plantsToClassify: { id: number; name: string; variety: string | null }[]
+	plantsToClassify: { id: number; name: string; variety: string | null }[],
+	model?: OpenAIModelId
 ): Promise<Record<number, string>> {
 	const openai = getClient();
 	if (!openai || plantsToClassify.length === 0) return {};
 
 	try {
+		const modelId = normalizeModelId(model);
 		const plantList = plantsToClassify
 			.map((p) => `${p.id}: ${p.name}${p.variety ? ` (${p.variety})` : ''}`)
 			.join('\n');
 
 		const response = await openai.chat.completions.create({
-			model: 'gpt-4o',
+			model: modelId,
 			response_format: { type: 'json_object' },
 			messages: [
 				{

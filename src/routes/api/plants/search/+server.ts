@@ -1,10 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { searchPlantVariety, downloadAndSavePlantImage } from '$lib/services/plantSearch';
-import { lookupPlantData } from '$lib/services/openaiEnrichment';
+import { lookupPlantData, type OpenAIModelId } from '$lib/services/openaiEnrichment';
 import * as queries from '$lib/db/queries';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const { query, plantId } = await request.json();
 
@@ -13,7 +13,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// AI lookup for growing data
-		const aiData = await lookupPlantData(query);
+		const model = cookies.get('openai_model') as OpenAIModelId | undefined;
+		const aiData = await lookupPlantData(query, model);
 
 		// Then search Trefle/web for additional info (images, descriptions, etc.)
 		const searchResult = await searchPlantVariety(query);

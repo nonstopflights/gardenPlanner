@@ -1,9 +1,9 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
 import * as queries from '$lib/db/queries';
-import { classifyPlantTypes } from '$lib/services/openaiEnrichment';
+import { classifyPlantTypes, type OpenAIModelId } from '$lib/services/openaiEnrichment';
 
-export const POST: RequestHandler = async () => {
+export const POST: RequestHandler = async ({ cookies }) => {
 	try {
 		const allPlants = await queries.getAllPlants();
 		const untagged = allPlants
@@ -14,7 +14,8 @@ export const POST: RequestHandler = async () => {
 			return json({ classified: 0 });
 		}
 
-		const typeMap = await classifyPlantTypes(untagged);
+		const model = cookies.get('openai_model') as OpenAIModelId | undefined;
+		const typeMap = await classifyPlantTypes(untagged, model);
 
 		let classified = 0;
 		for (const [idStr, plantType] of Object.entries(typeMap)) {

@@ -55,7 +55,8 @@
 		{ href: '/', label: 'Dashboard' },
 		{ href: '/beds', label: 'Beds' },
 		{ href: '/plants', label: 'Plants' },
-		{ href: '/journal', label: 'Journal' }
+		{ href: '/journal', label: 'Journal' },
+		{ href: '/settings', label: 'Settings' }
 	];
 
 	function isActive(href: string, pathname: string): boolean {
