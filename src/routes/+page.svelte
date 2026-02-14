@@ -208,26 +208,6 @@
 		</div>
 	</div>
 
-	<!-- Stat cards -->
-	<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-			<p class="text-3xl font-bold text-slate-900">{stats.totalPlants}</p>
-			<p class="mt-1 text-sm text-slate-500">Total Plants</p>
-		</div>
-		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-			<p class="text-3xl font-bold text-slate-900">{stats.currentPlants}</p>
-			<p class="mt-1 text-sm text-slate-500">Currently Planted</p>
-		</div>
-		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-			<p class="text-3xl font-bold text-slate-900">{stats.wantPlants}</p>
-			<p class="mt-1 text-sm text-slate-500">Want to Plant</p>
-		</div>
-		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-			<p class="text-3xl font-bold text-slate-900">{stats.totalBeds}</p>
-			<p class="mt-1 text-sm text-slate-500">Total Beds</p>
-		</div>
-	</div>
-
 	<!-- Header image -->
 	<div class="mb-8 overflow-hidden rounded-2xl">
 		<img src="/header.png" alt="Garden" class="w-full object-cover" />
@@ -359,6 +339,26 @@
 					{/each}
 				</div>
 			{/if}
+		</div>
+	</div>
+
+	<!-- Stat cards -->
+	<div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+			<p class="text-3xl font-bold text-slate-900">{stats.totalPlants}</p>
+			<p class="mt-1 text-sm text-slate-500">Total Plants</p>
+		</div>
+		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+			<p class="text-3xl font-bold text-slate-900">{stats.currentPlants}</p>
+			<p class="mt-1 text-sm text-slate-500">Currently Planted</p>
+		</div>
+		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+			<p class="text-3xl font-bold text-slate-900">{stats.wantPlants}</p>
+			<p class="mt-1 text-sm text-slate-500">Want to Plant</p>
+		</div>
+		<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+			<p class="text-3xl font-bold text-slate-900">{stats.totalBeds}</p>
+			<p class="mt-1 text-sm text-slate-500">Total Beds</p>
 		</div>
 	</div>
 
