@@ -3,12 +3,18 @@ import { redirect } from '@sveltejs/kit';
 
 const COOKIE_NAME = 'openai_model';
 
-const ALLOWED_MODELS = ['gpt-5-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1'] as const;
+const ALLOWED_MODELS = [
+	'gpt-5-mini',
+	'gpt-5.2-chat-latest',
+	'gpt-4o-mini',
+	'gpt-4o',
+	'gpt-4.1'
+] as const;
 type AllowedModel = (typeof ALLOWED_MODELS)[number];
 
 function normalizeModel(value: unknown): AllowedModel {
-	if (typeof value !== 'string') return 'gpt-5-mini';
-	return (ALLOWED_MODELS as readonly string[]).includes(value) ? (value as AllowedModel) : 'gpt-5-mini';
+	if (typeof value !== 'string') return 'gpt-4o-mini';
+	return (ALLOWED_MODELS as readonly string[]).includes(value) ? (value as AllowedModel) : 'gpt-4o-mini';
 }
 
 export const load: PageServerLoad = async ({ cookies }) => {

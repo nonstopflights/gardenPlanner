@@ -138,13 +138,15 @@ npm run preview
 
 ### Environment Variables
 
-Create a `.env` file in the root directory with your Trefle API token:
+Create a `.env` file in the project root with:
 
 ```
 TREFLE_API_TOKEN=your_trefle_api_token_here
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-Get your free API token by signing up at [Trefle.io](https://trefle.io/)
+- **TREFLE_API_TOKEN**: Get your free API token by signing up at [Trefle.io](https://trefle.io/)
+- **OPENAI_API_KEY**: Required for AI plant lookup and classification. Get your key at [platform.openai.com](https://platform.openai.com/api-keys)
 
 ## License
 

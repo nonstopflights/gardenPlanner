@@ -31,13 +31,16 @@
 		beds?: Bed[];
 		onEdit?: () => void;
 		onDelete?: () => void;
+		onView?: () => void;
 		compact?: boolean;
 	}
 
-	let { entry, images = [], beds = [], onEdit, onDelete, compact = false }: Props = $props();
+	let { entry, images = [], beds = [], onEdit, onDelete, onView, compact = false }: Props = $props();
 
 	let parsedTags = $derived<string[]>(entry.tags ? JSON.parse(entry.tags) : []);
 	const ACTION_WIDTH = 96;
+	const LONG_PRESS_MS = 500;
+	let longPressTimer: ReturnType<typeof setTimeout> | undefined;
 	let touchStartX = 0;
 	let touchStartY = 0;
 	let baseOffset = 0;
@@ -90,16 +93,26 @@
 	}
 
 	function onTouchStart(event: TouchEvent) {
-		if (!isMobileViewport() || !hasActions() || event.touches.length !== 1) return;
+		if (event.touches.length !== 1) return;
 		const touch = event.touches[0];
 		touchStartX = touch.clientX;
 		touchStartY = touch.clientY;
 		baseOffset = swipeOffset;
-		isDragging = true;
+		isDragging = isMobileViewport() && hasActions();
 		isHorizontalDrag = false;
+		if (isMobileViewport() && onView) {
+			longPressTimer = setTimeout(() => {
+				longPressTimer = undefined;
+				onView?.();
+			}, LONG_PRESS_MS);
+		}
 	}
 
 	function onTouchMove(event: TouchEvent) {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = undefined;
+		}
 		if (!isDragging || !isMobileViewport() || event.touches.length !== 1) return;
 		const touch = event.touches[0];
 		const dx = touch.clientX - touchStartX;
@@ -120,20 +133,32 @@
 	}
 
 	function onTouchEnd() {
+		if (longPressTimer) {
+			clearTimeout(longPressTimer);
+			longPressTimer = undefined;
+		}
 		if (!isDragging || !isMobileViewport()) return;
 		swipeOffset = swipeOffset <= -ACTION_WIDTH / 2 ? -ACTION_WIDTH : 0;
 		isDragging = false;
 		isHorizontalDrag = false;
 	}
 
-	function handleEdit() {
+	function handleEdit(e?: Event) {
+		e?.stopPropagation();
 		onEdit?.();
 		closeSwipe();
 	}
 
-	function handleDelete() {
+	function handleDelete(e?: Event) {
+		e?.stopPropagation();
 		onDelete?.();
 		closeSwipe();
+	}
+
+	function handleContentClick(e: MouseEvent) {
+		if (isMobileViewport()) return;
+		if ((e.target as HTMLElement).closest('button')) return;
+		onView?.();
 	}
 </script>
 
@@ -174,7 +199,13 @@
 			ontouchcancel={onTouchEnd}
 		>
 			<div class="flex items-start justify-between gap-3">
-			<div class="min-w-0 flex-1">
+			<div
+				class="min-w-0 flex-1 {onView ? 'cursor-pointer' : ''}"
+				role={onView ? 'button' : undefined}
+				tabindex={onView ? 0 : undefined}
+				onclick={handleContentClick}
+				onkeydown={onView ? (e) => e.key === 'Enter' && onView() : undefined}
+			>
 				<p class="truncate text-sm font-medium text-slate-900">{entry.title}</p>
 				<p class="mt-0.5 text-xs text-slate-400">{formatDate(entry.entryDate)}</p>
 				{#if entry.content}
@@ -262,7 +293,13 @@
 			ontouchcancel={onTouchEnd}
 		>
 			<div class="flex items-start justify-between gap-3">
-			<div class="min-w-0 flex-1">
+			<div
+				class="min-w-0 flex-1 {onView ? 'cursor-pointer' : ''}"
+				role={onView ? 'button' : undefined}
+				tabindex={onView ? 0 : undefined}
+				onclick={handleContentClick}
+				onkeydown={onView ? (e) => e.key === 'Enter' && onView() : undefined}
+			>
 				<h3 class="text-base font-semibold text-slate-900">{entry.title}</h3>
 				<p class="mt-1 text-sm text-slate-400">{formatDate(entry.entryDate)}</p>
 				{#if entry.content}

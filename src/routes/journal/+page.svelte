@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { activeSeason } from '$lib/stores/season';
 	import JournalEntryCard from '$lib/components/JournalEntryCard.svelte';
+	import JournalEntryDetailModal from '$lib/components/JournalEntryDetailModal.svelte';
 	import type { JournalEntry, JournalImage, Plant, Bed } from '$lib/db/queries';
 	import { ZONES } from '$lib/utils/zones';
 
 	let entries: JournalEntry[] = $state([]);
+	let modalEntry: JournalEntry | null = $state(null);
+	let modalOpen = $state(false);
 	let searchQuery = $state('');
 	let loading = $state(false);
 
@@ -222,12 +225,17 @@
 			for (const file of formPhotos) {
 				const fd = new FormData();
 				fd.append('image', file);
-				await fetch(`/api/journal/${entryId}/images`, { method: 'POST', body: fd });
+				const uploadRes = await fetch(`/api/journal/${entryId}/images`, { method: 'POST', body: fd });
+				if (!uploadRes.ok) {
+					const err = await uploadRes.json().catch(() => ({}));
+					throw new Error(err.error || `Failed to upload ${file.name}`);
+				}
 			}
 
 			// Delete removed photos
 			for (const imageId of photosToDelete) {
-				await fetch(`/api/journal/${entryId}/images/${imageId}`, { method: 'DELETE' });
+				const delRes = await fetch(`/api/journal/${entryId}/images/${imageId}`, { method: 'DELETE' });
+				if (!delRes.ok) throw new Error('Failed to delete photo');
 			}
 
 			showForm = false;
@@ -288,11 +296,46 @@
 		try {
 			const res = await fetch(`/api/journal/${id}`, { method: 'DELETE' });
 			if (res.ok) {
+				if (modalEntry?.id === id) {
+					modalOpen = false;
+					modalEntry = null;
+				}
 				await loadEntries();
 			}
 		} catch (err) {
 			console.error('Failed to delete journal entry:', err);
 		}
+	}
+
+	function openEntryModal(entry: JournalEntry) {
+		modalEntry = entry;
+		modalOpen = true;
+	}
+
+	async function saveModalEntry(data: {
+		title: string;
+		content: string;
+		entryDate: string;
+		tags: string | null;
+	}) {
+		if (!modalEntry) return;
+		const res = await fetch(`/api/journal/${modalEntry.id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				...data,
+				seasonId: $activeSeason?.id ?? null
+			})
+		});
+		if (!res.ok) throw new Error('Failed to update');
+		modalEntry = { ...modalEntry, ...data };
+		await loadEntries();
+	}
+
+	async function refreshModalImages() {
+		if (!modalEntry) return;
+		await loadEntryImages();
+		// Keep modalEntry but images will update via entryImages
 	}
 
 	// Planting log functions
@@ -709,10 +752,22 @@
 							beds={allBeds}
 							onEdit={() => openEditForm(entry)}
 							onDelete={() => deleteEntry(entry.id)}
+							onView={() => openEntryModal(entry)}
 						/>
 					{/each}
 				</div>
 			{/each}
 		</div>
 	{/if}
+
+	<!-- Entry detail modal -->
+	<JournalEntryDetailModal
+		entry={modalEntry}
+		images={modalEntry ? (entryImages.get(modalEntry.id) ?? []) : []}
+		beds={allBeds}
+		bind:open={modalOpen}
+		onClose={() => { modalEntry = null; }}
+		onSave={saveModalEntry}
+		onImagesChange={refreshModalImages}
+	/>
 </div>

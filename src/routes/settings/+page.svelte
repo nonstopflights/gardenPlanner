@@ -51,7 +51,7 @@
 						</Select.Content>
 					</Select.Root>
 					<p class="text-xs text-slate-500">
-						Default is <span class="font-medium text-slate-700">gpt-5-mini</span>. This setting is stored in a cookie.
+						Default is <span class="font-medium text-slate-700">gpt-4o-mini</span>. This setting is stored in a cookie.
 					</p>
 				</div>
 
