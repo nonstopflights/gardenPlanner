@@ -21,3 +21,7 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Backups (keep script and README, ignore backup data)
+backup/backup_*
+backup/*.tar.gz

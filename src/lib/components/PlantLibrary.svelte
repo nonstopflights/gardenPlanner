@@ -64,6 +64,14 @@
 		collapsedTypes = next;
 	}
 
+	function openAll() {
+		collapsedTypes = new Set();
+	}
+
+	function closeAll() {
+		collapsedTypes = new Set(groupedPlants.map((g) => g.type));
+	}
+
 	function sectionId(type: string): string {
 		return `plant-type-${type.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
 	}
@@ -126,6 +134,22 @@
 					<option value={type}>{type}</option>
 				{/each}
 			</select>
+		{/if}
+
+		{#if groupedPlants.length > 0}
+			<span class="mx-1 text-slate-300">|</span>
+			<button
+				onclick={openAll}
+				class="h-8 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+			>
+				Open all
+			</button>
+			<button
+				onclick={closeAll}
+				class="h-8 rounded-full border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+			>
+				Close all
+			</button>
 		{/if}
 	</div>
 
