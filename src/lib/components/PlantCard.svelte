@@ -11,6 +11,7 @@
 	let { plant, imageUrl, onClick }: Props = $props();
 
 	let isDragging = $state(false);
+	let lastDragEndAt = 0;
 
 	function getHeightSize(matureHeight: string | null | undefined): { label: string; class: string } | null {
 		if (!matureHeight) return null;
@@ -50,7 +51,8 @@
 		if (!browser) return;
 		isDragging = true;
 		if (event.dataTransfer) {
-			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.effectAllowed = 'copyMove';
+			event.dataTransfer.setData('application/x-plant-id', plant.id.toString());
 			event.dataTransfer.setData('text/plain', plant.id.toString());
 		}
 	}
@@ -58,6 +60,23 @@
 	function handleDragEnd() {
 		if (!browser) return;
 		isDragging = false;
+		lastDragEndAt = Date.now();
+	}
+
+	function handleCardClick(event: MouseEvent) {
+		if (Date.now() - lastDragEndAt < 250) {
+			event.preventDefault();
+			event.stopPropagation();
+			return;
+		}
+		onClick?.();
+	}
+
+	function handleKeyDown(event: KeyboardEvent) {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			onClick?.();
+		}
 	}
 </script>
 
@@ -66,7 +85,8 @@
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
 	class="group cursor-grab rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing touch-manipulation {isDragging ? 'opacity-50' : ''}"
-	onclick={onClick}
+	onclick={handleCardClick}
+	onkeydown={handleKeyDown}
 	role="button"
 	tabindex="0"
 >

@@ -12,7 +12,7 @@
 	let plants: Plant[] = $state([]);
 	let bedPlants: Record<number, BedPlant[]> = $state({});
 	let plantImages: Record<number, string> = $state({});
-	let showLibrary = $state(false);
+	let showLibrary = $state(true);
 	let initialized = $state(false);
 	let spotModalData: { plantId: number; bedId: number; zone: string } | null = $state(null);
 

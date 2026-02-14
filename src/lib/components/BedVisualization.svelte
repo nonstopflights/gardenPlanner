@@ -139,9 +139,11 @@
 
 		let plantId: number | null = null;
 		if (e.dataTransfer) {
+			const customPayload = e.dataTransfer.getData('application/x-plant-id');
 			const textPayload = e.dataTransfer.getData('text/plain');
-			if (textPayload) {
-				const parsed = Number(textPayload);
+			const payload = customPayload || textPayload;
+			if (payload) {
+				const parsed = Number(payload);
 				if (!Number.isNaN(parsed)) {
 					plantId = parsed;
 				}

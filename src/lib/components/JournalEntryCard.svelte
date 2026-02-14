@@ -37,6 +37,13 @@
 	let { entry, images = [], beds = [], onEdit, onDelete, compact = false }: Props = $props();
 
 	let parsedTags = $derived<string[]>(entry.tags ? JSON.parse(entry.tags) : []);
+	const ACTION_WIDTH = 96;
+	let touchStartX = 0;
+	let touchStartY = 0;
+	let baseOffset = 0;
+	let swipeOffset = $state(0);
+	let isDragging = false;
+	let isHorizontalDrag = false;
 
 	function formatDate(dateStr: string): string {
 		const d = new Date(dateStr + 'T00:00:00');
@@ -69,11 +76,104 @@
 		if (!bedId) return '';
 		return beds.find((b) => b.id === bedId)?.name ?? 'Bed';
 	}
+
+	function isMobileViewport(): boolean {
+		return typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches;
+	}
+
+	function hasActions(): boolean {
+		return Boolean(onEdit || onDelete);
+	}
+
+	function closeSwipe() {
+		swipeOffset = 0;
+	}
+
+	function onTouchStart(event: TouchEvent) {
+		if (!isMobileViewport() || !hasActions() || event.touches.length !== 1) return;
+		const touch = event.touches[0];
+		touchStartX = touch.clientX;
+		touchStartY = touch.clientY;
+		baseOffset = swipeOffset;
+		isDragging = true;
+		isHorizontalDrag = false;
+	}
+
+	function onTouchMove(event: TouchEvent) {
+		if (!isDragging || !isMobileViewport() || event.touches.length !== 1) return;
+		const touch = event.touches[0];
+		const dx = touch.clientX - touchStartX;
+		const dy = touch.clientY - touchStartY;
+
+		if (!isHorizontalDrag) {
+			if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+			isHorizontalDrag = Math.abs(dx) > Math.abs(dy);
+			if (!isHorizontalDrag) {
+				isDragging = false;
+				return;
+			}
+		}
+
+		const nextOffset = baseOffset + dx;
+		swipeOffset = Math.max(-ACTION_WIDTH, Math.min(0, nextOffset));
+		event.preventDefault();
+	}
+
+	function onTouchEnd() {
+		if (!isDragging || !isMobileViewport()) return;
+		swipeOffset = swipeOffset <= -ACTION_WIDTH / 2 ? -ACTION_WIDTH : 0;
+		isDragging = false;
+		isHorizontalDrag = false;
+	}
+
+	function handleEdit() {
+		onEdit?.();
+		closeSwipe();
+	}
+
+	function handleDelete() {
+		onDelete?.();
+		closeSwipe();
+	}
 </script>
 
 {#if compact}
-	<div class="group rounded-lg border border-slate-200 bg-white px-4 py-3 transition-shadow hover:shadow-sm">
-		<div class="flex items-start justify-between gap-3">
+	<div class="relative overflow-hidden rounded-lg border border-slate-200 bg-white">
+		{#if onEdit || onDelete}
+			<div class="absolute inset-y-0 right-0 flex w-24 sm:hidden">
+				{#if onEdit}
+					<button
+						onclick={handleEdit}
+						class="flex flex-1 items-center justify-center bg-slate-600 text-white"
+						aria-label="Edit entry"
+					>
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+						</svg>
+					</button>
+				{/if}
+				{#if onDelete}
+					<button
+						onclick={handleDelete}
+						class="flex flex-1 items-center justify-center bg-red-500 text-white"
+						aria-label="Delete entry"
+					>
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+						</svg>
+					</button>
+				{/if}
+			</div>
+		{/if}
+		<div
+			class="group px-4 py-3 transition-[transform,box-shadow] duration-200 hover:shadow-sm"
+			style={`transform: translateX(${swipeOffset}px)`}
+			ontouchstart={onTouchStart}
+			ontouchmove={onTouchMove}
+			ontouchend={onTouchEnd}
+			ontouchcancel={onTouchEnd}
+		>
+			<div class="flex items-start justify-between gap-3">
 			<div class="min-w-0 flex-1">
 				<p class="truncate text-sm font-medium text-slate-900">{entry.title}</p>
 				<p class="mt-0.5 text-xs text-slate-400">{formatDate(entry.entryDate)}</p>
@@ -97,10 +197,10 @@
 				{/if}
 			</div>
 			{#if onEdit || onDelete}
-				<div class="flex flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+				<div class="hidden flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100 sm:flex">
 					{#if onEdit}
 						<button
-							onclick={onEdit}
+							onclick={handleEdit}
 							class="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
 							aria-label="Edit entry"
 						>
@@ -111,7 +211,7 @@
 					{/if}
 					{#if onDelete}
 						<button
-							onclick={onDelete}
+							onclick={handleDelete}
 							class="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-red-500"
 							aria-label="Delete entry"
 						>
@@ -123,10 +223,45 @@
 				</div>
 			{/if}
 		</div>
+		</div>
 	</div>
 {:else}
-	<div class="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-		<div class="flex items-start justify-between gap-3">
+	<div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+		{#if onEdit || onDelete}
+			<div class="absolute inset-y-0 right-0 flex w-24 sm:hidden">
+				{#if onEdit}
+					<button
+						onclick={handleEdit}
+						class="flex flex-1 items-center justify-center bg-slate-600 text-white"
+						aria-label="Edit entry"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+						</svg>
+					</button>
+				{/if}
+				{#if onDelete}
+					<button
+						onclick={handleDelete}
+						class="flex flex-1 items-center justify-center bg-red-500 text-white"
+						aria-label="Delete entry"
+					>
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+						</svg>
+					</button>
+				{/if}
+			</div>
+		{/if}
+		<div
+			class="group p-5 transition-[transform,box-shadow] duration-200 hover:shadow-md"
+			style={`transform: translateX(${swipeOffset}px)`}
+			ontouchstart={onTouchStart}
+			ontouchmove={onTouchMove}
+			ontouchend={onTouchEnd}
+			ontouchcancel={onTouchEnd}
+		>
+			<div class="flex items-start justify-between gap-3">
 			<div class="min-w-0 flex-1">
 				<h3 class="text-base font-semibold text-slate-900">{entry.title}</h3>
 				<p class="mt-1 text-sm text-slate-400">{formatDate(entry.entryDate)}</p>
@@ -160,10 +295,10 @@
 				{/if}
 			</div>
 			{#if onEdit || onDelete}
-				<div class="flex flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+				<div class="hidden flex-shrink-0 gap-1 opacity-0 transition-opacity group-hover:opacity-100 sm:flex">
 					{#if onEdit}
 						<button
-							onclick={onEdit}
+							onclick={handleEdit}
 							class="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
 							aria-label="Edit entry"
 						>
@@ -174,7 +309,7 @@
 					{/if}
 					{#if onDelete}
 						<button
-							onclick={onDelete}
+							onclick={handleDelete}
 							class="rounded p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-500"
 							aria-label="Delete entry"
 						>
@@ -185,6 +320,7 @@
 					{/if}
 				</div>
 			{/if}
+		</div>
 		</div>
 	</div>
 {/if}
