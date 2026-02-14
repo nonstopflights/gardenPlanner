@@ -25,3 +25,10 @@ vite.config.ts.timestamp-*
 # Backups (keep script and README, ignore backup data)
 backup/backup_*
 backup/*.tar.gz
+
+# Database (back up with backup/backup.sh instead)
+database/garden.db
+database/*.backup
+
+# Plant images fetched from web (included in backup, not in repo)
+static/plant-images/web/
