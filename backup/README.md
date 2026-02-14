@@ -23,6 +23,28 @@
 
 Keeps the 10 most recent backups; older ones are pruned automatically.
 
+## Automatic backup (every 5 minutes, only when changed)
+
+On the server, install the launchd job so backups run automatically when the database or images change:
+
+```bash
+# 1. Ensure logs dir exists
+mkdir -p /Users/server/Git/gardenPlanner/logs
+
+# 2. Edit the plist if your project path is different from /Users/server/Git/gardenPlanner
+#    Update all three /Users/server/Git/gardenPlanner paths in backup/com.gardenplanner.backup.plist
+
+# 3. Install the plist
+cp backup/com.gardenplanner.backup.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.gardenplanner.backup.plist
+```
+
+**Manage the job:**
+```bash
+launchctl list com.gardenplanner.backup              # check status
+launchctl unload ~/Library/LaunchAgents/com.gardenplanner.backup.plist   # stop
+```
+
 ## Restore from backup
 
 ```bash

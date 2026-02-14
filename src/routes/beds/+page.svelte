@@ -188,6 +188,7 @@
 			images={plantImages}
 			onPlantClick={handleLibraryPlantClick}
 			onAddPlant={() => goto('/plants/new')}
+			printBedPlanHref="/beds/print"
 		/>
 	</div>
 {/if}
