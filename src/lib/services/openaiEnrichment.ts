@@ -76,62 +76,31 @@ const PLANT_JSON_SCHEMA = {
 	],
 	properties: {
 		name: { type: 'string' },
-		variety: { type: 'string' },
+		variety: { type: ['string', 'null'] },
 		category: {
 			type: 'string',
 			enum: ['Want to Plant', 'Planted', 'Harvested', 'Archived']
 		},
 		plant_type: {
 			type: 'string',
-			enum: ['Tomato', 'Pepper', 'Onion', 'Squash', 'Bean', 'Pea', 'Lettuce', 'Greens', 'Herb', 'Flower', 'Root Vegetable', 'Brassica', 'Cucumber', 'Melon', 'Corn', 'Berry', 'Fruit Tree', 'Other'],
-			description: 'The general type/category of this plant'
+			enum: ['Tomato', 'Pepper', 'Onion', 'Squash', 'Bean', 'Pea', 'Lettuce', 'Greens', 'Herb', 'Flower', 'Root Vegetable', 'Brassica', 'Cucumber', 'Melon', 'Corn', 'Berry', 'Fruit Tree', 'Other']
 		},
-		planting_date: { type: ['string', 'null'], description: 'YYYY-MM-DD' },
-		harvest_date: { type: ['string', 'null'], description: 'YYYY-MM-DD' },
+		planting_date: { type: ['string', 'null'] },
+		harvest_date: { type: ['string', 'null'] },
 		days_to_maturity: { type: ['integer', 'null'], minimum: 1 },
-		planting_season: { type: 'string' },
+		planting_season: { type: 'string', enum: ['Spring', 'Fall', 'Spring and Fall'] },
 		planting_schedule: {
 			type: 'object',
 			additionalProperties: false,
 			required: [
 				'start_indoors_weeks_before_last_frost',
 				'transplant_outdoors_weeks_after_last_frost',
-				'direct_sow_weeks_after_last_frost',
-				'suggested_start_indoors_date_range',
-				'suggested_transplant_date_range',
-				'suggested_direct_sow_date_range'
+				'direct_sow_weeks_after_last_frost'
 			],
 			properties: {
 				start_indoors_weeks_before_last_frost: { type: ['integer', 'null'], minimum: 0 },
 				transplant_outdoors_weeks_after_last_frost: { type: ['integer', 'null'], minimum: 0 },
-				direct_sow_weeks_after_last_frost: { type: ['integer', 'null'], minimum: 0 },
-				suggested_start_indoors_date_range: {
-					type: ['object', 'null'],
-					additionalProperties: false,
-					required: ['start', 'end'],
-					properties: {
-						start: { type: 'string', description: 'YYYY-MM-DD' },
-						end: { type: 'string', description: 'YYYY-MM-DD' }
-					}
-				},
-				suggested_transplant_date_range: {
-					type: ['object', 'null'],
-					additionalProperties: false,
-					required: ['start', 'end'],
-					properties: {
-						start: { type: 'string', description: 'YYYY-MM-DD' },
-						end: { type: 'string', description: 'YYYY-MM-DD' }
-					}
-				},
-				suggested_direct_sow_date_range: {
-					type: ['object', 'null'],
-					additionalProperties: false,
-					required: ['start', 'end'],
-					properties: {
-						start: { type: 'string', description: 'YYYY-MM-DD' },
-						end: { type: 'string', description: 'YYYY-MM-DD' }
-					}
-				}
+				direct_sow_weeks_after_last_frost: { type: ['integer', 'null'], minimum: 0 }
 			}
 		},
 		growing_details: {
@@ -143,9 +112,9 @@ const PLANT_JSON_SCHEMA = {
 				sun_requirements: { type: ['string', 'null'] },
 				water_needs: { type: ['string', 'null'] },
 				companion_plants: { type: 'array', items: { type: 'string' } },
-				mature_height: { type: ['string', 'null'], description: 'e.g. "4-6 feet", "12-18 inches"' },
-				growing_notes: { type: ['string', 'null'], description: 'Brief cultivation tips, soil preferences, fertilizing advice, pest/disease notes' },
-				harvesting_notes: { type: ['string', 'null'], description: 'When and how to harvest, signs of ripeness, storage tips' }
+				mature_height: { type: ['string', 'null'] },
+				growing_notes: { type: ['string', 'null'] },
+				harvesting_notes: { type: ['string', 'null'] }
 			}
 		},
 		seed_info: {
@@ -161,17 +130,10 @@ const PLANT_JSON_SCHEMA = {
 	}
 };
 
-const SYSTEM_MESSAGE = `You are a gardening data assistant specializing in home vegetable and flower gardening.
-Return ONLY valid JSON that matches the provided JSON Schema exactly.
-Do not include markdown, comments, trailing commas, or additional keys.
-If a field is truly unknown, use null (not an empty string).
-Use the user's location and frost dates to compute all suggested planting dates and date ranges.
-Prefer common, broadly-correct horticultural guidance when variety-specific details are unknown.
-Always try to provide values for days_to_maturity, spacing, mature_height, sun_requirements, water_needs, companion_plants, growing_notes, harvesting_notes, and the planting schedule — these are rarely truly unknown for common garden plants.
-For growing_notes, include practical cultivation tips like soil preferences, fertilizing, common pests/diseases, and care advice.
-For harvesting_notes, include when to harvest, signs of ripeness, how to pick, and storage tips.
-For planting_season use "Spring", "Fall", or "Spring and Fall".
-For category always return "Want to Plant".`;
+const SYSTEM_MESSAGE = `You are a gardening data assistant. Fill in ALL fields with accurate horticultural data. Use null only when genuinely unknown.
+growing_notes: soil preferences, fertilizing, pests/diseases, care tips.
+harvesting_notes: when/how to harvest, ripeness signs, storage.
+category: always "Want to Plant".`;
 
 export async function lookupPlantData(
 	query: string,
@@ -182,33 +144,23 @@ export async function lookupPlantData(
 
 	try {
 		const modelId = normalizeModelId(model);
-		const userMessage = `Create an import-ready plant record for my garden planner app.
-
-Grower context:
-- Location: Lancaster, PA
-- USDA Hardiness Zone: 7a / 7b
-- Average last spring frost date: April 28
-- Average first fall frost date: October 11
-- Current year: 2026
-
-Plant to look up: ${query}
-
-Fill in ALL fields you can with accurate horticultural data for this plant.
-Use the frost dates above to calculate suggested_start_indoors_date_range, suggested_transplant_date_range, and suggested_direct_sow_date_range as concrete YYYY-MM-DD dates for the 2026 growing season.
-For seed_source, suggest a reputable online seed company that sells this plant if known.
-
-Return JSON matching this schema:
-${JSON.stringify(PLANT_JSON_SCHEMA, null, 2)}`;
+		const userMessage = `Plant: ${query}
+Location: Lancaster PA, zone 7a/7b, last frost April 28, first frost October 11, year 2026.
+For planting_date/harvest_date use YYYY-MM-DD based on frost dates above.
+For seed_source suggest a reputable seed company if known.`;
 
 		const response = await openai.chat.completions.create({
 			model: modelId,
-			response_format: { type: 'json_object' },
+			response_format: {
+				type: 'json_schema',
+				json_schema: { name: 'plant_record', strict: false, schema: PLANT_JSON_SCHEMA }
+			},
 			messages: [
 				{ role: 'system', content: SYSTEM_MESSAGE },
 				{ role: 'user', content: userMessage }
 			],
 			temperature: 0.3,
-			max_tokens: 2000
+			max_tokens: 1000
 		});
 
 		const content = response.choices[0]?.message?.content;
