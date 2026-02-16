@@ -7,6 +7,8 @@
 		plants: Plant[];
 		bedPlants: Record<number, BedPlant[]>;
 		plantImages?: Record<number, string>;
+		highlightedPlant?: Plant | null;
+		sidebarOpen?: boolean;
 		onPlantAdd: (bedId: number, plantId: number, posX: number, posY: number) => Promise<void> | void;
 		onPlantMove: (bedPlantId: number, posX: number, posY: number) => Promise<void> | void;
 		onPlantRemove: (bedPlantId: number) => Promise<void> | void;
@@ -14,7 +16,19 @@
 		onBedUpdate?: (bedId: number, data: { caption?: string }) => Promise<void> | void;
 	}
 
-	let { beds, plants, bedPlants, plantImages = {}, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick, onBedUpdate }: Props = $props();
+	let { beds, plants, bedPlants, plantImages = {}, highlightedPlant = null, sidebarOpen = false, onPlantAdd, onPlantMove, onPlantRemove, onPlantClick, onBedUpdate }: Props = $props();
+
+	function bedHasPlant(bedId: number, plantId: number): number {
+		const bps = bedPlants[bedId] || [];
+		return bps.filter((bp) => bp.plantId === plantId).length;
+	}
+
+	function getBedHighlightClass(bedId: number): string {
+		if (!highlightedPlant) return '';
+		const count = bedHasPlant(bedId, highlightedPlant.id);
+		if (count > 0) return 'ring-2 ring-emerald-400 ring-offset-2';
+		return 'ring-2 ring-dashed ring-slate-300 ring-offset-2';
+	}
 
 	// Caption editing state
 	let editingCaptionBedId: number | null = $state(null);
@@ -349,10 +363,11 @@
 	onpointerup={handlePointerUp}
 />
 
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+<div class="grid gap-4 p-4 {sidebarOpen ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'}">
 	{#each beds as bed (bed.id)}
 		{@const bps = bedPlants[bed.id] || []}
-		<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+		{@const highlightClass = getBedHighlightClass(bed.id)}
+		<div id="bed-{bed.id}" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow {highlightClass}">
 			<div class="flex items-center justify-between gap-2">
 				<h3 class="shrink-0 text-base font-semibold text-slate-900">{bed.name}</h3>
 				{#if editingCaptionBedId === bed.id}
@@ -385,6 +400,21 @@
 					+
 				</button>
 			</div>
+
+			<!-- Highlighted plant context badge -->
+			{#if highlightedPlant}
+				{@const count = bedHasPlant(bed.id, highlightedPlant.id)}
+				<div class="mt-2 flex items-center gap-1.5 rounded-md px-2 py-1 text-xs {count > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-500'}">
+					{#if count > 0}
+						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+						</svg>
+						<span class="font-medium">{count} {highlightedPlant.name} here</span>
+					{:else}
+						<span>No {highlightedPlant.name} yet</span>
+					{/if}
+				</div>
+			{/if}
 
 			<!-- Plant picker dropdown -->
 			{#if addingToBedId === bed.id}
