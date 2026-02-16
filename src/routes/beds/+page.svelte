@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { get } from 'svelte/store';
 	import BedVisualization from '$lib/components/BedVisualization.svelte';
+	import BedOverview from '$lib/components/BedOverview.svelte';
 	import PlantLibrary from '$lib/components/PlantLibrary.svelte';
 	import SpotPhotoModal from '$lib/components/SpotPhotoModal.svelte';
 	import type { Bed, Plant, BedPlant } from '$lib/db/queries';
@@ -15,6 +16,11 @@
 	let showLibrary = $state(true);
 	let initialized = $state(false);
 	let spotModalData: { plantId: number; bedId: number; zone: string } | null = $state(null);
+	let selectedPlant: Plant | null = $state(null);
+
+	// Hover preview tooltip state (rendered at page level to escape sidebar stacking context)
+	let hoverPlant: Plant | null = $state(null);
+	let hoverPos: { x: number; y: number } | null = $state(null);
 
 	onMount(async () => {
 		await loadData();
@@ -32,15 +38,12 @@
 		const season = get(activeSeason);
 		const seasonParam = season?.id ? `?seasonId=${season.id}` : '';
 
-		// Load beds
 		const bedsRes = await fetch('/api/beds');
 		beds = await bedsRes.json();
 
-		// Load plants
 		const plantsRes = await fetch('/api/plants');
 		plants = await plantsRes.json();
 
-		// Load bed-plant relationships
 		const bedPlantsMap: Record<number, BedPlant[]> = {};
 		for (const bed of beds) {
 			const res = await fetch(`/api/beds/${bed.id}${seasonParam}`);
@@ -51,7 +54,6 @@
 		}
 		bedPlants = bedPlantsMap;
 
-		// Load plant images
 		const imagesMap: Record<number, string> = {};
 		for (const plant of plants) {
 			const res = await fetch(`/api/plants/${plant.id}/images`);
@@ -81,7 +83,6 @@
 
 	async function handlePlantMove(bedPlantId: number, posX: number, posY: number) {
 		try {
-			// Find which bed this bedPlant belongs to
 			let targetBedId: number | null = null;
 			for (const [bedIdStr, bps] of Object.entries(bedPlants)) {
 				if (bps.some((bp) => bp.id === bedPlantId)) {
@@ -97,7 +98,6 @@
 				body: JSON.stringify({ bedPlantId, posX, posY })
 			});
 
-			// Update local state immediately (no full reload needed)
 			const updatedMap = { ...bedPlants };
 			if (updatedMap[targetBedId]) {
 				updatedMap[targetBedId] = updatedMap[targetBedId].map((bp) =>
@@ -112,7 +112,6 @@
 
 	async function handlePlantRemove(bedPlantId: number) {
 		try {
-			// Find which bed this bedPlant belongs to
 			let targetBedId: number | null = null;
 			for (const [bedIdStr, bps] of Object.entries(bedPlants)) {
 				if (bps.some((bp) => bp.id === bedPlantId)) {
@@ -158,9 +157,50 @@
 	function handleBedPlantClick(bedId: number, plantId: number, zone: string) {
 		spotModalData = { plantId, bedId, zone };
 	}
+
+	function handlePlantSelect(plant: Plant | null) {
+		selectedPlant = plant;
+	}
+
+	function scrollToBed(bedId: number) {
+		const el = document.getElementById(`bed-${bedId}`);
+		el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	}
+
+	function handlePlantHover(plant: Plant | null, pos: { x: number; y: number } | null) {
+		hoverPlant = plant;
+		hoverPos = pos;
+	}
+
+	function buildPlantSummary(plant: Plant): string {
+		const parts: string[] = [];
+		if (plant.matureHeight) parts.push(`Height: ${plant.matureHeight}`);
+		if (plant.spacing) parts.push(`Spacing: ${plant.spacing}`);
+		if (plant.sunRequirements) parts.push(plant.sunRequirements);
+		if (plant.waterNeeds) parts.push(`${plant.waterNeeds} water`);
+		if (plant.daysToMaturity) parts.push(`${plant.daysToMaturity} days to harvest`);
+		if (plant.plantingSeason) parts.push(`Plant in ${plant.plantingSeason}`);
+		return parts.join(' · ');
+	}
+
+	let tooltipStyle = $derived.by(() => {
+		if (!hoverPos) return '';
+		const pad = 12;
+		const cardW = 280;
+		const cardH = 260;
+		let x = hoverPos.x + pad;
+		let y = hoverPos.y - cardH / 2;
+		if (typeof window !== 'undefined') {
+			if (x + cardW > window.innerWidth - pad) x = hoverPos.x - cardW - pad;
+			if (y < pad) y = pad;
+			if (y + cardH > window.innerHeight - pad) y = window.innerHeight - cardH - pad;
+		}
+		return `left: ${x}px; top: ${y}px;`;
+	});
 </script>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+<!-- Header -->
+<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 	<div>
 		<h1 class="text-lg font-semibold text-slate-900">Garden Bed Planning</h1>
 		<p class="text-sm text-slate-500">Drag plants from the library or click + to add. Move circles to position them.</p>
@@ -168,9 +208,17 @@
 	<div class="flex items-center gap-3">
 		<button
 			onclick={() => (showLibrary = !showLibrary)}
-			class="inline-flex h-9 items-center justify-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
+			class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
 		>
-			{showLibrary ? 'Hide' : 'Show'} Plant Library
+			<svg
+				class="h-4 w-4 transition-transform {showLibrary ? '' : 'rotate-180'}"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+			</svg>
+			{showLibrary ? 'Hide' : 'Show'} Plants
 		</button>
 		<a
 			href="/plants/new"
@@ -181,29 +229,55 @@
 	</div>
 </div>
 
-{#if showLibrary}
-	<div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-		<PlantLibrary
+<!-- Desktop: sidebar + main content | Mobile: stacked -->
+<div class="flex gap-4">
+	<!-- Sidebar (lg+) / Stacked section (mobile) -->
+	{#if showLibrary}
+		<aside
+			class="shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300
+				w-full lg:w-[340px] lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start"
+		>
+			<div class="h-full lg:overflow-y-auto">
+				<PlantLibrary
+					{plants}
+					images={plantImages}
+					onPlantClick={handleLibraryPlantClick}
+					onAddPlant={() => goto('/plants/new')}
+					onPlantSelect={handlePlantSelect}
+					onPlantHover={handlePlantHover}
+					printBedPlanHref="/beds/print"
+					compact={true}
+				/>
+			</div>
+		</aside>
+	{/if}
+
+	<!-- Main content area -->
+	<div class="min-w-0 flex-1">
+		<!-- Bed overview quick-jump nav -->
+		{#if beds.length > 0}
+			<BedOverview
+				{beds}
+				{bedPlants}
+				onBedClick={scrollToBed}
+			/>
+		{/if}
+
+		<BedVisualization
+			{beds}
 			{plants}
-			images={plantImages}
-			onPlantClick={handleLibraryPlantClick}
-			onAddPlant={() => goto('/plants/new')}
-			printBedPlanHref="/beds/print"
+			{bedPlants}
+			{plantImages}
+			highlightedPlant={selectedPlant}
+			sidebarOpen={showLibrary}
+			onPlantAdd={handlePlantAdd}
+			onPlantMove={handlePlantMove}
+			onPlantRemove={handlePlantRemove}
+			onPlantClick={handleBedPlantClick}
+			onBedUpdate={handleBedUpdate}
 		/>
 	</div>
-{/if}
-
-<BedVisualization
-	{beds}
-	{plants}
-	{bedPlants}
-	{plantImages}
-	onPlantAdd={handlePlantAdd}
-	onPlantMove={handlePlantMove}
-	onPlantRemove={handlePlantRemove}
-	onPlantClick={handleBedPlantClick}
-	onBedUpdate={handleBedUpdate}
-/>
+</div>
 
 {#if spotModalData}
 	{@const season = $activeSeason}
@@ -219,4 +293,31 @@
 			onClose={() => (spotModalData = null)}
 		/>
 	{/if}
+{/if}
+
+<!-- Plant hover preview tooltip (rendered at page level to escape sidebar stacking context) -->
+{#if hoverPlant && hoverPos}
+	<div
+		class="pointer-events-none fixed z-[100] w-[280px] rounded-xl border border-slate-200 bg-white p-3 shadow-xl"
+		style={tooltipStyle}
+	>
+		{#if plantImages[hoverPlant.id]}
+			<img
+				src={plantImages[hoverPlant.id]}
+				alt={hoverPlant.name}
+				class="mb-2 h-32 w-full rounded-lg object-cover"
+			/>
+		{/if}
+		<p class="text-sm font-semibold text-slate-900">
+			{hoverPlant.name}
+			{#if hoverPlant.variety}
+				<span class="font-normal text-slate-500"> — {hoverPlant.variety}</span>
+			{/if}
+		</p>
+		{#if hoverPlant.plantType}
+			<p class="mt-0.5 text-xs font-medium uppercase tracking-wide text-purple-600">{hoverPlant.plantType}</p>
+		{/if}
+		<p class="mt-1.5 text-xs leading-relaxed text-slate-500">{buildPlantSummary(hoverPlant)}</p>
+		<p class="mt-2 text-[10px] text-slate-400">Click to view details</p>
+	</div>
 {/if}
