@@ -72,6 +72,34 @@
 	onFilteredChange={(filtered) => (calendarPlants = filtered)}
 />
 
+<!-- Seed Planter Reference Map -->
+{#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
+	<div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+		<h2 class="mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
+		<p class="mb-4 text-sm text-slate-500">Currently planted varieties and their tray reference numbers.</p>
+		<div class="flex flex-wrap gap-3">
+			{#each plants
+				.filter((p) => p.category === 'current' && p.planterRef != null)
+				.sort((a, b) => (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
+				<a
+					href="/plants/{plant.id}"
+					class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+				>
+					<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
+						{plant.planterRef}
+					</span>
+					<div class="min-w-0">
+						<p class="font-medium text-slate-800 leading-tight">{plant.name}</p>
+						{#if plant.variety}
+							<p class="text-xs text-slate-400 truncate">{plant.variety}</p>
+						{/if}
+					</div>
+				</a>
+			{/each}
+		</div>
+	</div>
+{/if}
+
 <!-- Planting Calendar -->
 <div class="mt-8">
 	<PlantingCalendar plants={calendarPlants} />

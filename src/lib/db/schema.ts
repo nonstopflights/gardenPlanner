@@ -40,6 +40,7 @@ export const plants = sqliteTable('plants', {
 	directSowWeeks: integer('direct_sow_weeks'), // weeks after last frost (negative = before)
 	plantType: text('plant_type'), // e.g. "Tomato", "Pepper", "Flower", "Herb"
 	haveSeeds: integer('have_seeds', { mode: 'boolean' }).notNull().default(false),
+	planterRef: integer('planter_ref'),
 	createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()),
 	updatedAt: text('updated_at').notNull().$defaultFn(() => new Date().toISOString())
 });

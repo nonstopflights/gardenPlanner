@@ -6,6 +6,7 @@
 	import type { Plant, PlantImage, Bed, Season } from '$lib/db/queries';
 	import ActivityTimeline from '$lib/components/ActivityTimeline.svelte';
 	import GrowthTimeline from '$lib/components/GrowthTimeline.svelte';
+	import PlantingCalendar from '$lib/components/PlantingCalendar.svelte';
 	import ImagePickerModal from '$lib/components/ImagePickerModal.svelte';
 	import SeedSearchSection from '$lib/components/SeedSearchSection.svelte';
 	import InlineEditor from '$lib/components/InlineEditor.svelte';
@@ -31,6 +32,7 @@
 		category: 'want' as 'past' | 'want' | 'current',
 		plantType: '',
 		haveSeeds: false,
+		planterRef: '',
 		plantingDate: '',
 		harvestDate: '',
 		spacing: '',
@@ -76,6 +78,7 @@
 				category: (plant!.category as 'past' | 'want' | 'current') || 'want',
 				plantType: plant!.plantType || '',
 				haveSeeds: plant!.haveSeeds ?? false,
+			planterRef: plant!.planterRef?.toString() || '',
 				plantingDate: plant!.plantingDate || '',
 				harvestDate: plant!.harvestDate || '',
 				spacing: plant!.spacing || '',
@@ -132,6 +135,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					...formData,
+					planterRef: formData.planterRef ? parseInt(formData.planterRef) : null,
 					plantType: formData.plantType || null,
 					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
@@ -251,6 +255,7 @@
 		if (data.seedSource) formData.seedSource = data.seedSource;
 		if (data.seedSourceUrl) formData.seedSourceUrl = data.seedSourceUrl;
 		if (data.seedCost) formData.seedCost = data.seedCost.toString();
+		if (data.planterRef != null) formData.planterRef = data.planterRef.toString();
 	}
 
 	async function handleImageSelect(imagePath: string) {
@@ -299,7 +304,8 @@
 			sunRequirements: formData.sunRequirements || null,
 			waterNeeds: formData.waterNeeds || null,
 			companionPlants: formData.companionPlants || null,
-			matureHeight: formData.matureHeight || null
+			matureHeight: formData.matureHeight || null,
+			planterRef: formData.planterRef ? parseInt(formData.planterRef) : null
 		});
 	}
 
@@ -431,6 +437,18 @@
 					Have Seeds
 				</label>
 			</div>
+			{#if formData.category === 'current'}
+				<div>
+					<label class="mb-1 block text-sm font-medium text-slate-700">Seed Planter Reference #</label>
+					<input
+						type="number"
+						bind:value={formData.planterRef}
+						placeholder="e.g., 12"
+						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					/>
+					<p class="mt-1 text-xs text-slate-400">The number marked in your seed planter tray</p>
+				</div>
+			{/if}
 			{#if showDates}
 				<div>
 					<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>
@@ -673,6 +691,12 @@
 								Have Seeds
 							</span>
 						{/if}
+						{#if plant.planterRef != null}
+							<span class="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+								<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+								Planter #{plant.planterRef}
+							</span>
+						{/if}
 					</div>
 				</div>
 				<div class="mt-3 flex flex-wrap gap-2">
@@ -784,6 +808,14 @@
 							<dd class="text-sm text-slate-700">{plant.matureHeight}</dd>
 						</div>
 					{/if}
+					{#if plant?.planterRef != null}
+						<div>
+							<dt class="text-sm font-medium text-slate-500">Seed Planter Reference</dt>
+							<dd class="mt-0.5">
+								<span class="inline-flex items-center justify-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-sm font-semibold text-emerald-800">#{plant.planterRef}</span>
+							</dd>
+						</div>
+					{/if}
 					{#if !plant?.plantingDate && !plant?.harvestDate && !plant?.daysToMaturity && !plant?.spacing && !plant?.sunRequirements && !plant?.waterNeeds}
 						<p class="text-sm italic text-slate-400">No planting info yet. Click to add.</p>
 					{/if}
@@ -857,6 +889,12 @@
 						<label class="mb-1 block text-xs font-medium text-slate-600">Mature Height</label>
 						<input type="text" bind:value={formData.matureHeight} placeholder="e.g., 4-6 feet" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 					</div>
+					{#if plant?.category === 'current'}
+						<div>
+							<label class="mb-1 block text-xs font-medium text-slate-600">Seed Planter Reference #</label>
+							<input type="number" bind:value={formData.planterRef} placeholder="e.g., 12" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+						</div>
+					{/if}
 				</div>
 			{/snippet}
 		</EditableSection>
@@ -967,6 +1005,13 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Planting Calendar -->
+	{#if plant.plantingSeason}
+		<div class="mt-6">
+			<PlantingCalendar plants={[plant]} />
+		</div>
+	{/if}
 
 	<!-- Activity Timeline -->
 	<div class="mt-6">
