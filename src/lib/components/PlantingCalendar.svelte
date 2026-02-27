@@ -131,35 +131,46 @@
 </script>
 
 {#if calendarPlants.length > 0}
-	<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-		<h2 class="mb-1 text-base font-semibold text-slate-900">Planting Calendar</h2>
-		<p class="mb-4 text-sm text-slate-500">Based on Lancaster, PA frost dates (Last frost: Apr 28, First frost: Oct 11)</p>
+	<div class="rounded-2xl border border-stone-200 bg-stone-50 p-6">
+		<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Planting Calendar</h2>
+		<p class="mb-4 text-sm text-stone-500">
+			Based on Lancaster, PA frost dates
+			<span class="inline-flex items-center gap-1 ml-1">
+				<span class="h-1.5 w-1.5 rounded-full bg-red-300"></span>
+				<span>Last frost: <strong class="font-semibold text-stone-700">Apr 28</strong></span>
+			</span>
+			<span class="mx-1 text-stone-300">·</span>
+			<span class="inline-flex items-center gap-1">
+				<span class="h-1.5 w-1.5 rounded-full bg-blue-300"></span>
+				<span>First frost: <strong class="font-semibold text-stone-700">Oct 11</strong></span>
+			</span>
+		</p>
 
 		<!-- Legend -->
 		<div class="mb-4 flex flex-wrap gap-3">
 			<div class="flex items-center gap-1.5">
 				<div class="h-2.5 w-5 rounded-sm bg-violet-400"></div>
-				<span class="text-xs text-slate-600">Start Indoors</span>
+				<span class="text-xs text-stone-600">Start Indoors</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-2.5 w-5 rounded-sm bg-emerald-400"></div>
-				<span class="text-xs text-slate-600">Transplant</span>
+				<span class="text-xs text-stone-600">Transplant</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-2.5 w-5 rounded-sm bg-amber-400"></div>
-				<span class="text-xs text-slate-600">Direct Sow</span>
+				<span class="text-xs text-stone-600">Direct Sow</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-2.5 w-5 rounded-sm bg-green-400"></div>
-				<span class="text-xs text-slate-600">Harvest</span>
+				<span class="text-xs text-stone-600">Harvest</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-3.5 w-0 border-l-2 border-dashed border-red-400"></div>
-				<span class="text-xs text-slate-600">Last Frost</span>
+				<span class="text-xs text-stone-600">Last Frost</span>
 			</div>
 			<div class="flex items-center gap-1.5">
 				<div class="h-3.5 w-0 border-l-2 border-dashed border-blue-400"></div>
-				<span class="text-xs text-slate-600">First Frost</span>
+				<span class="text-xs text-stone-600">First Frost</span>
 			</div>
 		</div>
 
@@ -171,9 +182,9 @@
 					<div class="w-32 flex-shrink-0"></div>
 					<div class="relative flex-1">
 						<div class="flex">
-							{#each MONTHS as month}
-								<div class="flex-1 text-center text-xs font-medium text-slate-500">{month}</div>
-							{/each}
+					{#each MONTHS as month}
+							<div class="flex-1 text-center text-xs font-medium text-stone-500">{month}</div>
+						{/each}
 						</div>
 					</div>
 				</div>
@@ -181,21 +192,21 @@
 				<!-- Grid lines + frost markers shared container -->
 				<div class="space-y-0">
 					{#each calendarPlants as row (row.plant.id)}
-						<div class="group flex items-center border-t border-slate-100 py-1.5">
+						<div class="group flex items-center border-t border-stone-200 py-2 transition hover:bg-stone-100/60 -mx-2 px-2 rounded">
 							<!-- Plant name -->
 							<div class="w-32 flex-shrink-0 pr-3">
-								<p class="truncate text-sm font-medium text-slate-700">{row.plant.name}</p>
+								<p class="font-display truncate text-sm font-medium text-slate-700">{row.plant.name}</p>
 								{#if row.plant.variety}
-									<p class="truncate text-xs text-slate-400">{row.plant.variety}</p>
+									<p class="truncate text-xs italic text-stone-400">{row.plant.variety}</p>
 								{/if}
 							</div>
 
 							<!-- Timeline bar area -->
-							<div class="relative h-7 flex-1 rounded bg-slate-50">
+							<div class="relative h-8 flex-1 rounded bg-stone-100/60">
 								<!-- Month grid lines -->
 								{#each MONTHS as _, i}
 									<div
-										class="absolute top-0 h-full border-l border-slate-100"
+										class="absolute top-0 h-full border-l border-stone-200/60"
 										style="left: {(i / 12) * 100}%"
 									></div>
 								{/each}
@@ -234,7 +245,7 @@
 		</div>
 	</div>
 {:else}
-	<div class="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-center">
-		<p class="text-sm text-slate-500">No planting schedules yet. Edit a plant and set its planting season to see the calendar.</p>
+	<div class="rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-6 text-center">
+		<p class="text-sm text-stone-500">No planting schedules yet. Edit a plant and set its planting season to see the calendar.</p>
 	</div>
 {/if}

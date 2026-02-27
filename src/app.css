@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--background: hsl(0 0% 100%);
+	--background: hsl(40 20% 99%);
+	--font-display: 'Lora', Georgia, serif;
 	--foreground: hsl(240 10% 3.9%);
 	--muted: hsl(240 4.8% 95.9%);
 	--muted-foreground: hsl(240 3.8% 46.1%);
@@ -119,4 +121,8 @@
 	user-select: none;
 	-webkit-user-select: none;
 	-webkit-touch-callout: none;
+}
+
+@utility font-display {
+	font-family: var(--font-display);
 }

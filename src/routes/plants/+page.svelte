@@ -49,19 +49,22 @@
 	}
 </script>
 
-<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-	<p class="text-sm font-medium text-blue-900">
-		Lancaster, PA Frost Dates
-		<span class="mx-2 text-blue-300">|</span>
-		Last Frost: <span class="font-semibold">April 28</span>
-		<span class="mx-2 text-blue-300">|</span>
-		First Frost: <span class="font-semibold">October 11</span>
-	</p>
-</div>
-
-<div class="mb-6">
-	<h1 class="text-lg font-semibold text-slate-900">Plant Library</h1>
-	<p class="text-sm text-slate-500">Curate varieties before placing them in beds.</p>
+<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+	<div>
+		<h1 class="font-display text-2xl font-semibold text-slate-900">Plant Library</h1>
+		<p class="mt-0.5 text-sm text-stone-500">Curate varieties before placing them in beds.</p>
+	</div>
+	<div class="flex flex-shrink-0 items-center gap-4 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-600">
+		<span class="flex items-center gap-1.5">
+			<span class="h-2 w-2 rounded-full bg-red-300"></span>
+			Last frost <strong class="font-semibold text-stone-800">Apr 28</strong>
+		</span>
+		<span class="text-stone-300">·</span>
+		<span class="flex items-center gap-1.5">
+			<span class="h-2 w-2 rounded-full bg-blue-300"></span>
+			First frost <strong class="font-semibold text-stone-800">Oct 11</strong>
+		</span>
+	</div>
 </div>
 
 <PlantLibrary
@@ -74,17 +77,17 @@
 
 <!-- Seed Planter Reference Map -->
 {#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
-	<div class="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-		<h2 class="mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
-		<p class="mb-4 text-sm text-slate-500">Currently planted varieties and their tray reference numbers.</p>
+	<div class="mt-8 rounded-2xl border border-stone-200 bg-stone-50 p-6">
+		<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
+		<p class="mb-4 text-sm text-stone-500">Currently planted varieties and their tray reference numbers.</p>
 		<div class="flex flex-wrap gap-3">
 			{#each plants
 				.filter((p) => p.category === 'current' && p.planterRef != null)
 				.sort((a, b) => (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
-				<a
-					href="/plants/{plant.id}"
-					class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-				>
+			<a
+				href="/plants/{plant.id}"
+				class="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+			>
 					<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
 						{plant.planterRef}
 					</span>

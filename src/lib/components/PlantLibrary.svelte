@@ -163,39 +163,39 @@
 				bind:value={searchQuery}
 				class="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 {compact ? '' : 'h-10 sm:max-w-sm'}"
 			/>
-			{#if !compact}
-				<button
-					onclick={onAddPlant}
-					class="inline-flex h-10 items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
-				>
-					+ Add Plant
-				</button>
-			{/if}
+		{#if !compact}
+			<button
+				onclick={onAddPlant}
+				class="inline-flex h-10 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-800"
+			>
+				+ Add Plant
+			</button>
+		{/if}
 		</div>
 
 		<!-- Category + type filters -->
 		<div class="flex flex-wrap items-center gap-1.5 {compact ? '' : 'gap-2'}">
 			<button
 				onclick={() => (selectedCategory = 'all')}
-				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'all' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
+				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'all' ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
 			>
 				All
 			</button>
 			<button
 				onclick={() => (selectedCategory = 'past')}
-				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'past' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
+				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'past' ? 'border-stone-500 bg-stone-500 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-stone-300 hover:text-stone-700'}"
 			>
 				Past
 			</button>
 			<button
 				onclick={() => (selectedCategory = 'want')}
-				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'want' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
+				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'want' ? 'border-sky-600 bg-sky-600 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-sky-300 hover:text-sky-700'}"
 			>
 				Want
 			</button>
 			<button
 				onclick={() => (selectedCategory = 'current')}
-				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'current' ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
+				class="rounded-full border font-semibold uppercase tracking-wide transition {pillSize} {selectedCategory === 'current' ? 'border-emerald-700 bg-emerald-700 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:text-emerald-700'}"
 			>
 				Current
 			</button>
@@ -328,31 +328,31 @@
 						</div>
 					{/if}
 				</div>
-			{:else}
-				<!-- Full: original card grid layout -->
-				<section class="rounded-xl border border-slate-200 bg-slate-50/40 p-3 sm:p-4">
-					<button
-						type="button"
-						onclick={() => toggleTypeSection(group.type)}
-						class="mb-3 flex w-full items-center justify-between rounded-md px-1 py-1 text-left transition hover:bg-slate-100/70"
-						aria-expanded={!collapsedTypes.has(group.type)}
-						aria-controls={sectionId(group.type)}
+		{:else}
+			<!-- Full: original card grid layout -->
+			<section class="rounded-xl border border-stone-200 bg-stone-50/60 p-3 sm:p-4">
+				<button
+					type="button"
+					onclick={() => toggleTypeSection(group.type)}
+					class="mb-3 flex w-full items-center justify-between rounded-md px-1 py-1 text-left transition hover:bg-stone-100/70"
+					aria-expanded={!collapsedTypes.has(group.type)}
+					aria-controls={sectionId(group.type)}
+				>
+					<div class="flex items-center gap-2.5">
+						<h3 class="font-display text-sm font-semibold italic text-stone-600">{group.type}</h3>
+						<span class="rounded-full border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500">
+							{group.plants.length}
+						</span>
+					</div>
+					<svg
+						class="h-4 w-4 text-stone-400 transition-transform {collapsedTypes.has(group.type) ? '' : 'rotate-180'}"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
 					>
-						<div class="flex items-center gap-2">
-							<h3 class="text-xs font-semibold uppercase tracking-wide text-slate-500">{group.type}</h3>
-							<span class="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-								{group.plants.length}
-							</span>
-						</div>
-						<svg
-							class="h-4 w-4 text-slate-400 transition-transform {collapsedTypes.has(group.type) ? '' : 'rotate-180'}"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-						</svg>
-					</button>
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+					</svg>
+				</button>
 
 					{#if !collapsedTypes.has(group.type)}
 						<div id={sectionId(group.type)} class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -368,7 +368,7 @@
 	</div>
 
 	{#if filteredPlants.length === 0}
-		<div class="{compact ? 'p-4 text-center text-sm text-slate-400' : 'rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center text-slate-500'}">
+		<div class="{compact ? 'p-4 text-center text-sm text-stone-400' : 'rounded-2xl border border-dashed border-stone-200 bg-stone-50 p-10 text-center text-stone-500'}">
 			<p>No plants found{compact ? '' : '. Add your first plant to get started!'}</p>
 		</div>
 	{/if}

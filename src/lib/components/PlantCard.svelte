@@ -47,6 +47,19 @@
 
 	let heightSize = $derived(getHeightSize(plant.matureHeight));
 
+	function getCategoryAccent(category: string | null): { border: string; gradient: string } {
+		switch (category) {
+			case 'current':
+				return { border: 'border-l-emerald-500', gradient: 'from-emerald-600/10' };
+			case 'want':
+				return { border: 'border-l-sky-400', gradient: 'from-sky-600/10' };
+			default:
+				return { border: 'border-l-stone-300', gradient: 'from-stone-600/8' };
+		}
+	}
+
+	let categoryAccent = $derived(getCategoryAccent(plant.category));
+
 	function handleDragStart(event: DragEvent) {
 		if (!browser) return;
 		isDragging = true;
@@ -84,38 +97,34 @@
 	draggable={browser}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	class="group cursor-grab rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing touch-manipulation {isDragging ? 'opacity-50' : ''}"
+	class="group cursor-grab rounded-2xl border border-slate-200 border-l-4 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing touch-manipulation {categoryAccent.border} {isDragging ? 'opacity-50' : ''}"
 	onclick={handleCardClick}
 	onkeydown={handleKeyDown}
 	role="button"
 	tabindex="0"
 >
 	{#if imageUrl}
-		<img
-			src={imageUrl}
-			alt={plant.name}
-			class="h-32 w-full rounded-xl object-cover"
-			loading="lazy"
-		/>
+		<div class="relative h-32 w-full overflow-hidden rounded-xl">
+			<img
+				src={imageUrl}
+				alt={plant.name}
+				class="h-full w-full object-cover"
+				loading="lazy"
+			/>
+			<div class="absolute inset-0 bg-gradient-to-t {categoryAccent.gradient} to-transparent"></div>
+		</div>
 	{:else}
 		<div
-			class="flex h-32 w-full items-center justify-center rounded-xl bg-slate-100 text-3xl"
+			class="flex h-32 w-full items-center justify-center rounded-xl bg-stone-100 text-3xl"
 		>
 			<span>🌱</span>
 		</div>
 	{/if}
-	<div class="mt-3 text-base font-semibold text-slate-900">{plant.name}</div>
+	<div class="mt-3 font-display text-base font-semibold text-slate-900">{plant.name}</div>
 	{#if plant.variety}
-		<div class="text-sm text-slate-500">{plant.variety}</div>
+		<div class="text-sm text-stone-500 italic">{plant.variety}</div>
 	{/if}
 	<div class="mt-3 flex flex-wrap gap-1.5">
-		{#if plant.category}
-			<span
-				class="rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide {plant.category === 'current' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : plant.category === 'want' ? 'border-sky-200 bg-sky-50 text-sky-700' : 'border-slate-200 bg-slate-50 text-slate-600'}"
-			>
-				{plant.category}
-			</span>
-		{/if}
 		{#if plant.plantType}
 			<span
 				class="rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-purple-700"
@@ -134,7 +143,7 @@
 			<span
 				class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700"
 			>
-				Have Seeds
+				Seeds ✓
 			</span>
 		{/if}
 	</div>
