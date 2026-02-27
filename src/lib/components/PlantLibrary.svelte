@@ -32,6 +32,7 @@
 	let selectedType = $state<string>('all');
 	let collapsedTypes = $state<Set<string>>(new Set());
 	let selectedPlantId = $state<number | null>(null);
+	let seedsView = $state(false);
 
 	// Hover preview state (compact mode only)
 	let hoverActive = false;
@@ -226,6 +227,12 @@
 				>
 					Close all
 				</button>
+				<button
+					onclick={() => (seedsView = !seedsView)}
+					class="h-8 rounded-full border px-3 text-xs font-semibold transition {seedsView ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900'}"
+				>
+					Seeds view
+				</button>
 			{/if}
 
 			{#if printBedPlanHref}
@@ -247,6 +254,39 @@
 
 	<!-- Plant list -->
 	<div class="{compact ? 'flex-1 overflow-y-auto p-2 space-y-2' : 'space-y-5'}">
+		{#if !compact && seedsView}
+			<!-- Seeds view: sorted by tray reference number -->
+			<div class="flex flex-wrap gap-3 pt-1">
+				{#each filteredPlants.slice().sort((a, b) => {
+					if (a.planterRef == null && b.planterRef == null) return 0;
+					if (a.planterRef == null) return 1;
+					if (b.planterRef == null) return -1;
+					return a.planterRef - b.planterRef;
+				}) as plant (plant.id)}
+					<button
+						type="button"
+						onclick={() => onPlantClick(plant)}
+						class="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-left transition hover:border-emerald-300 hover:bg-emerald-50"
+					>
+						{#if plant.planterRef != null}
+							<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
+								{plant.planterRef}
+							</span>
+						{:else}
+							<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-400">
+								—
+							</span>
+						{/if}
+						<div class="min-w-0">
+							<p class="font-medium text-slate-800 leading-tight">{plant.name}</p>
+							{#if plant.variety}
+								<p class="text-xs text-slate-400 truncate">{plant.variety}</p>
+							{/if}
+						</div>
+					</button>
+				{/each}
+			</div>
+		{:else}
 		{#each groupedPlants as group (group.type)}
 			{#if compact}
 				<!-- Compact: minimal group headers + list items -->
@@ -324,6 +364,7 @@
 				</section>
 			{/if}
 		{/each}
+		{/if}
 	</div>
 
 	{#if filteredPlants.length === 0}

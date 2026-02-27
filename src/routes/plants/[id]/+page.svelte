@@ -838,10 +838,10 @@
 					</div>
 				</div>
 
-				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSource || plant?.seedSourceUrl || plant?.seedCost != null || plant?.planterRef != null}
+				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.planterRef != null}
 					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate)}
 					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
-					{@const hasSeed = !!(plant?.seedSource || plant?.seedSourceUrl || plant?.seedCost != null)}
+					{@const hasSeed = !!(plant?.seedSourceUrl)}
 					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						<!-- Schedule column -->
 						{#if hasSchedule}
@@ -946,28 +946,16 @@
 								{#if hasSeed}
 									<div>
 										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Seed Source</p>
-										<div class="rounded-xl border border-slate-100 bg-slate-50 p-3">
-											{#if plant?.seedSource}
-												<p class="font-medium text-slate-800">{plant.seedSource}</p>
-											{/if}
-											<div class="mt-1 flex items-center gap-3 flex-wrap">
-												{#if plant?.seedCost != null}
-													<span class="text-sm font-semibold text-emerald-700">{formatCost(plant.seedCost)}</span>
-												{/if}
-												{#if plant?.seedSourceUrl}
-													<a
-														href={plant.seedSourceUrl}
-														target="_blank"
-														rel="noopener noreferrer"
-														onclick={(e) => e.stopPropagation()}
-														class="inline-flex items-center gap-1 text-xs font-medium text-slate-500 underline decoration-slate-300 hover:text-slate-800 hover:decoration-slate-500"
-													>
-														Visit site
-														<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-													</a>
-												{/if}
-											</div>
-										</div>
+										<a
+											href={plant?.seedSourceUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											onclick={(e) => e.stopPropagation()}
+											class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
+										>
+											Seed Source
+											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+										</a>
 									</div>
 								{/if}
 								{#if plant?.planterRef != null}
