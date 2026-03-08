@@ -65,15 +65,15 @@ else
   echo "[SKIP] iCloud copy (path not found - not on server?)"
 fi
 
-# Prune old backups: keep 10 most recent
+# Prune old backups: keep 5 most recent
 cd "$BACKUP_DIR"
-ls -dt backup_* 2>/dev/null | tail -n +11 | while read -r old; do
+ls -dt backup_* 2>/dev/null | tail -n +6 | while read -r old; do
   if [ -d "$old" ]; then
     rm -rf "$old"
     echo "[PRUNE] Removed $old"
   fi
 done
-ls -t backup_*.tar.gz 2>/dev/null | tail -n +11 | while read -r old; do
+ls -t backup_*.tar.gz 2>/dev/null | tail -n +6 | while read -r old; do
   rm -f "$old"
   echo "[PRUNE] Removed $old"
 done

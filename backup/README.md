@@ -21,7 +21,7 @@
 1. **Project** — `backup/backup_YYYY-MM-DD_HHMMSS/` and `backup/backup_YYYY-MM-DD_HHMMSS.tar.gz`
 2. **iCloud** — `/Users/server/Library/Mobile Documents/com~apple~CloudDocs/Server/Backups/GardenPlanner/`
 
-Keeps the 10 most recent backups; older ones are pruned automatically.
+Keeps the 5 most recent backups; older ones are pruned automatically.
 
 ## Automatic backup (every 5 minutes, only when changed)
 
