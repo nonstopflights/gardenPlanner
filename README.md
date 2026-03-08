@@ -148,6 +148,36 @@ OPENAI_API_KEY=your_openai_api_key_here
 - **TREFLE_API_TOKEN**: Get your free API token by signing up at [Trefle.io](https://trefle.io/)
 - **OPENAI_API_KEY**: Required for AI plant lookup and classification. Get your key at [platform.openai.com](https://platform.openai.com/api-keys)
 
+## Backup & Restore
+
+Backups run automatically via launchd and include the database and all images.
+
+### Backup locations
+
+- **Local**: `backup/` in the project root — keeps the 5 most recent `.tar.gz` archives
+- **iCloud**: `~/Library/Mobile Documents/com~apple~CloudDocs/Server/Backups/GardenPlanner/` (server machine only)
+
+To run a backup manually:
+```bash
+bash backup/backup.sh
+```
+
+### Restoring from a backup
+
+```bash
+cd backup
+
+# Extract the archive (replace filename as needed)
+tar -xzf backup_2026-02-14_130221.tar.gz
+
+# Restore database
+cp backup_2026-02-14_130221/database/garden.db ../database/garden.db
+
+# Restore images
+cp -R backup_2026-02-14_130221/static/plant-images ../static/
+cp -R backup_2026-02-14_130221/static/journal-images ../static/
+```
+
 ## License
 
 MIT
