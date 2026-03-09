@@ -1,11 +1,10 @@
 import axios from 'axios';
-import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { existsSync } from 'fs';
 import sharp from 'sharp';
 import * as cheerio from 'cheerio';
 import { env } from '$env/dynamic/private';
 import * as queries from '$lib/db/queries';
+import { ensureImageDir, sanitizeUploadFilename } from '$lib/server/imageStorage';
 
 interface PlantSearchResult {
 	name: string;
@@ -300,10 +299,7 @@ export async function downloadAndSavePlantImage(
 	plantId: number
 ): Promise<string | null> {
 	try {
-		const webDir = join(process.cwd(), 'static', 'plant-images', 'web');
-		if (!existsSync(webDir)) {
-			await mkdir(webDir, { recursive: true });
-		}
+		const webDir = await ensureImageDir('plant-images', 'web');
 
 		// Download image
 		const response = await axios.get(imageUrl, { responseType: 'arraybuffer', timeout: 10000 });
@@ -311,7 +307,7 @@ export async function downloadAndSavePlantImage(
 
 		// Generate filename
 		const timestamp = Date.now();
-		const ext = imageUrl.split('.').pop()?.split('?')[0] || 'jpg';
+		const ext = sanitizeUploadFilename(imageUrl.split('.').pop()?.split('?')[0] || 'jpg') || 'jpg';
 		const filename = `${plantId}_web_${timestamp}.${ext}`;
 		const filepath = join(webDir, filename);
 		const relativePath = `/api/serve-image/plant-images/web/${filename}`;

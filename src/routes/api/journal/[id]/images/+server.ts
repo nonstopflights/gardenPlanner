@@ -1,10 +1,9 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { existsSync } from 'fs';
 import sharp from 'sharp';
 import * as queries from '$lib/db/queries';
+import { ensureImageDir, sanitizeUploadFilename } from '$lib/server/imageStorage';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const id = parseInt(params.id);
@@ -27,13 +26,10 @@ export const POST: RequestHandler = async ({ params, request }) => {
 
 		if (!file) throw error(400, 'Missing image file');
 
-		const uploadsDir = join(process.cwd(), 'static', 'journal-images', 'uploads');
-		if (!existsSync(uploadsDir)) {
-			await mkdir(uploadsDir, { recursive: true });
-		}
+		const uploadsDir = await ensureImageDir('journal-images', 'uploads');
 
 		const timestamp = Date.now();
-		const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+		const safeName = sanitizeUploadFilename(file.name || 'upload.jpg') || 'upload.jpg';
 		const filename = `journal_${entryId}_${timestamp}_${safeName}`;
 		const filepath = join(uploadsDir, filename);
 		const relativePath = `/api/serve-image/journal-images/uploads/${filename}`;
@@ -58,6 +54,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	} catch (err) {
 		if (err instanceof Error && 'status' in err) throw err;
 		console.error('Journal image upload error:', err);
-		return json({ error: 'Failed to upload image' }, { status: 500 });
+		const message = err instanceof Error ? err.message : 'Failed to upload image';
+		return json({ error: message }, { status: 500 });
 	}
 };
