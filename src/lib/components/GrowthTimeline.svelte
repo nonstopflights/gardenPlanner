@@ -46,6 +46,7 @@
 	let editingId: number | null = $state(null);
 	let editingTagsId: number | null = $state(null);
 	let editSeasonId = $state('');
+	let selectedImageId: number | null = $state(null);
 	let uploadEditorHost: HTMLDivElement | null = $state(null);
 	let editEditorHost: HTMLDivElement | null = $state(null);
 	let uploadEditor: Editor | null = $state(null);
@@ -345,6 +346,31 @@
 	function isActive(editor: Editor | null, type: string, attrs?: Record<string, unknown>): boolean {
 		return editor?.isActive(type, attrs) ?? false;
 	}
+
+	let selectedImage: ImageEntry | null = $derived.by(
+		() => images.find((img) => img.id === selectedImageId) ?? null
+	);
+
+	function openImageModal(img: ImageEntry) {
+		selectedImageId = img.id;
+	}
+
+	function closeImageModal() {
+		selectedImageId = null;
+		if (editingId !== null) {
+			stopEditing();
+		}
+		editingTagsId = null;
+	}
+
+	function formatDate(dateStr: string): string {
+		const d = new Date(dateStr.includes('T') ? dateStr : dateStr + 'T00:00:00');
+		return d.toLocaleDateString('en-US', {
+			month: 'long',
+			day: 'numeric',
+			year: 'numeric'
+		});
+	}
 </script>
 
 <div class="space-y-6">
@@ -469,103 +495,39 @@
 			{#each groupedImages as group (group.date)}
 				<div>
 					<h3 class="mb-3 text-sm font-semibold text-slate-500">{group.label}</h3>
-					<div class="space-y-4">
+					<div class="grid gap-5 lg:grid-cols-2">
 						{#each group.images as img (img.id)}
-							<div class="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-								<img
-									src={img.imagePath}
-									alt={editorPlainText(img.caption) || 'Plant photo'}
-									class="max-h-64 w-full rounded-t-xl object-cover"
-								/>
+							<button
+								type="button"
+								onclick={() => openImageModal(img)}
+								class="group overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+							>
+								<div class="flex h-80 items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(226,232,240,0.75),_rgba(248,250,252,0.95)_65%)] p-4">
+									<img
+										src={img.imagePath}
+										alt={editorPlainText(img.caption) || 'Plant photo'}
+										class="max-h-full w-full rounded-2xl object-contain shadow-[0_16px_40px_-24px_rgba(15,23,42,0.5)]"
+									/>
+									<div class="pointer-events-none absolute"></div>
+								</div>
 
-								<div class="px-4 py-3">
-									<div class="flex items-start justify-between gap-2">
-										<div class="min-w-0 flex-1">
-											{#if editingId === img.id}
-												<div class="overflow-hidden rounded-lg border border-slate-200 bg-white">
-													<div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-2">
-														<button
-															type="button"
-															onclick={() => editEditor?.chain().focus().toggleBold().run()}
-															class="rounded px-2 py-1 text-xs font-semibold transition {isActive(editEditor, 'bold') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
-														>
-															Bold
-														</button>
-														<button
-															type="button"
-															onclick={() => editEditor?.chain().focus().toggleItalic().run()}
-															class="rounded px-2 py-1 text-xs transition {isActive(editEditor, 'italic') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
-														>
-															Italic
-														</button>
-														<button
-															type="button"
-															onclick={() => editEditor?.chain().focus().toggleBulletList().run()}
-															class="rounded px-2 py-1 text-xs transition {isActive(editEditor, 'bulletList') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
-														>
-															List
-														</button>
-														<div class="flex-1"></div>
-														<button
-															type="button"
-															onclick={stopEditing}
-															class="rounded px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
-														>
-															Cancel
-														</button>
-														<button
-															type="button"
-															onclick={saveCaption}
-															class="rounded bg-slate-900 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-slate-800"
-														>
-															Save
-														</button>
-													</div>
-													<div bind:this={editEditorHost}></div>
-												</div>
-											{:else if img.caption}
-												<div class="prose prose-sm prose-slate max-w-none text-slate-600">
-													{@html img.caption}
-												</div>
+								<div class="space-y-3 px-5 py-4">
+									<div class="flex items-start justify-between gap-3">
+										<div class="min-w-0">
+											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+												{formatDate(img.takenAt ?? img.uploadedAt)}
+											</p>
+											{#if img.caption}
+												<p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
+													{editorPlainText(img.caption)}
+												</p>
 											{:else}
-												<p class="text-sm italic text-slate-300">No caption</p>
+												<p class="mt-2 text-sm italic text-slate-300">No caption yet</p>
 											{/if}
 										</div>
-
-										<div class="flex items-center gap-1 transition-opacity sm:opacity-0 group-hover:opacity-100">
-											<button
-												type="button"
-												onclick={() => startEditing(img)}
-												class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-												aria-label="Edit caption"
-											>
-												<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-													<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-												</svg>
-											</button>
-											{#if seasons.length > 0}
-												<button
-													type="button"
-													onclick={() => startEditingTags(img)}
-													class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
-													aria-label="Edit season"
-												>
-													<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-														<path fill-rule="evenodd" d="M5 3a1 1 0 00-1 1v1H3a1 1 0 000 2h1v7a3 3 0 003 3h6a3 3 0 003-3V7h1a1 1 0 100-2h-1V4a1 1 0 00-1-1H5zm2 2V5h6v0H7zm0 4a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
-													</svg>
-												</button>
-											{/if}
-											<button
-												type="button"
-												onclick={() => onDelete(img.id)}
-												class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-red-500"
-												aria-label="Delete photo"
-											>
-												<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-													<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-												</svg>
-											</button>
-										</div>
+										<span class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500">
+											Open
+										</span>
 									</div>
 
 									{#if img.seasonId}
@@ -575,41 +537,8 @@
 											</span>
 										</div>
 									{/if}
-
-									{#if editingTagsId === img.id}
-										<div class="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2">
-											{#if seasons.length > 0}
-												<div>
-													<label class="mb-0.5 block text-[10px] text-slate-500">Season</label>
-													<select
-														bind:value={editSeasonId}
-														class="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-slate-400 focus:outline-none"
-													>
-														<option value="">None</option>
-														{#each seasons as s}
-															<option value={s.id.toString()}>{s.name}</option>
-														{/each}
-													</select>
-												</div>
-											{/if}
-											<button
-												type="button"
-												onclick={saveTags}
-												class="rounded bg-slate-800 px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-700"
-											>
-												Save
-											</button>
-											<button
-												type="button"
-												onclick={() => (editingTagsId = null)}
-												class="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
-											>
-												Cancel
-											</button>
-										</div>
-									{/if}
 								</div>
-							</div>
+							</button>
 						{/each}
 					</div>
 				</div>
@@ -617,3 +546,172 @@
 		</div>
 	{/if}
 </div>
+
+{#if selectedImage}
+	<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm"
+		onclick={(e) => {
+			if (e.target === e.currentTarget) closeImageModal();
+		}}
+	>
+		<div class="flex max-h-[90vh] w-full max-w-6xl flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl lg:flex-row">
+			<div class="flex min-h-[320px] flex-1 items-center justify-center bg-[linear-gradient(180deg,_#f8fafc_0%,_#e2e8f0_100%)] p-6">
+				<img
+					src={selectedImage.imagePath}
+					alt={editorPlainText(selectedImage.caption) || 'Plant photo'}
+					class="max-h-[72vh] w-full rounded-2xl object-contain"
+				/>
+			</div>
+
+			<div class="flex w-full max-w-xl flex-col border-t border-slate-200 lg:border-l lg:border-t-0">
+				<div class="flex items-start justify-between border-b border-slate-100 px-6 py-5">
+					<div>
+						<p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+							Growth entry
+						</p>
+						<p class="mt-2 text-sm text-slate-500">
+							{formatDate(selectedImage.takenAt ?? selectedImage.uploadedAt)}
+						</p>
+					</div>
+					<button
+						type="button"
+						onclick={closeImageModal}
+						class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+						aria-label="Close"
+					>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
+
+				<div class="flex-1 space-y-5 overflow-y-auto px-6 py-5">
+					{#if editingId === selectedImage.id}
+						<div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+							<div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 px-2 py-2">
+								<button
+									type="button"
+									onclick={() => editEditor?.chain().focus().toggleBold().run()}
+									class="rounded px-2 py-1 text-xs font-semibold transition {isActive(editEditor, 'bold') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
+								>
+									Bold
+								</button>
+								<button
+									type="button"
+									onclick={() => editEditor?.chain().focus().toggleItalic().run()}
+									class="rounded px-2 py-1 text-xs transition {isActive(editEditor, 'italic') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
+								>
+									Italic
+								</button>
+								<button
+									type="button"
+									onclick={() => editEditor?.chain().focus().toggleBulletList().run()}
+									class="rounded px-2 py-1 text-xs transition {isActive(editEditor, 'bulletList') ? 'bg-slate-200 text-slate-900' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}"
+								>
+									List
+								</button>
+								<div class="flex-1"></div>
+								<button
+									type="button"
+									onclick={stopEditing}
+									class="rounded px-2 py-1 text-xs text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+								>
+									Cancel
+								</button>
+								<button
+									type="button"
+									onclick={saveCaption}
+									class="rounded bg-slate-900 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-slate-800"
+								>
+									Save
+								</button>
+							</div>
+							<div bind:this={editEditorHost}></div>
+						</div>
+					{:else if selectedImage.caption}
+						<div class="rounded-xl border border-slate-200 bg-white p-5">
+							<div class="prose prose-sm prose-slate max-w-none text-slate-700">
+								{@html selectedImage.caption}
+							</div>
+						</div>
+					{:else}
+						<div class="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm italic text-slate-400">
+							No caption yet.
+						</div>
+					{/if}
+
+					{#if selectedImage.seasonId}
+						<div class="flex flex-wrap gap-2">
+							<span class="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700">
+								{seasonName(selectedImage.seasonId)}
+							</span>
+						</div>
+					{/if}
+
+					{#if editingTagsId === selectedImage.id}
+						<div class="flex flex-wrap items-end gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+							{#if seasons.length > 0}
+								<div>
+									<label class="mb-0.5 block text-[10px] text-slate-500">Season</label>
+									<select
+										bind:value={editSeasonId}
+										class="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-slate-400 focus:outline-none"
+									>
+										<option value="">None</option>
+										{#each seasons as s}
+											<option value={s.id.toString()}>{s.name}</option>
+										{/each}
+									</select>
+								</div>
+							{/if}
+							<button
+								type="button"
+								onclick={saveTags}
+								class="rounded bg-slate-800 px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-700"
+							>
+								Save
+							</button>
+							<button
+								type="button"
+								onclick={() => (editingTagsId = null)}
+								class="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+							>
+								Cancel
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				<div class="flex flex-wrap items-center gap-2 border-t border-slate-100 px-6 py-4">
+					<button
+						type="button"
+						onclick={() => startEditing(selectedImage)}
+						class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+					>
+						Edit caption
+					</button>
+					{#if seasons.length > 0}
+						<button
+							type="button"
+							onclick={() => startEditingTags(selectedImage)}
+							class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+						>
+							Edit season
+						</button>
+					{/if}
+					<button
+						type="button"
+						onclick={() => {
+							onDelete(selectedImage.id);
+							closeImageModal();
+						}}
+						class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-100"
+					>
+						Delete photo
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
