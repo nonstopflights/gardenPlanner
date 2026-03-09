@@ -3,7 +3,7 @@
 	import { get } from 'svelte/store';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import type { Plant, PlantImage, Bed, Season } from '$lib/db/queries';
+	import type { Plant, PlantImage, Season } from '$lib/db/queries';
 	import ActivityTimeline from '$lib/components/ActivityTimeline.svelte';
 	import GrowthTimeline from '$lib/components/GrowthTimeline.svelte';
 	import PlantingCalendar from '$lib/components/PlantingCalendar.svelte';
@@ -17,7 +17,6 @@
 	let images: PlantImage[] = $state([]);
 	let webInfo: any = $state(null);
 	let activities: any[] = $state([]);
-	let allBeds: Bed[] = $state([]);
 	let allSeasons: Season[] = $state([]);
 	let loading = $state(true);
 	let editing = $state(false);
@@ -100,15 +99,13 @@
 			};
 
 			// Load images, activities, beds, seasons in parallel
-			const [imgRes, actRes, bedsRes, seasonsRes] = await Promise.all([
+			const [imgRes, actRes, seasonsRes] = await Promise.all([
 				fetch(`/api/plants/${plantId}/images`),
 				fetch(`/api/plants/${plantId}/activities`),
-				fetch('/api/beds'),
 				fetch('/api/seasons')
 			]);
 			images = await imgRes.json();
 			activities = await actRes.json();
-			allBeds = await bedsRes.json();
 			allSeasons = await seasonsRes.json();
 
 			// Load web info
@@ -204,7 +201,11 @@
 		if (bedId) fd.append('bedId', bedId.toString());
 		if (zone) fd.append('zone', zone);
 		if (seasonId) fd.append('seasonId', seasonId.toString());
-		await fetch('/api/images', { method: 'POST', body: fd });
+		const res = await fetch('/api/images', { method: 'POST', body: fd });
+		if (!res.ok) {
+			const data = await res.json().catch(() => null);
+			throw new Error(data?.error || 'Failed to upload image');
+		}
 		await loadPlant();
 	}
 
@@ -1047,7 +1048,6 @@
 			onUpload={handleGrowthUpload}
 			onUpdate={handleImageUpdate}
 			onDelete={handleImageDelete}
-			beds={allBeds}
 			seasons={allSeasons}
 			currentSeasonId={$activeSeason?.id ?? null}
 		/>
