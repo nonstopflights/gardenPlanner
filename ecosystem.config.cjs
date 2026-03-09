@@ -6,7 +6,8 @@ module.exports = {
 			env: {
 				NODE_ENV: 'production',
 				PORT: 3010,
-				ORIGIN: 'http://localhost:3010'
+				ORIGIN: 'https://garden.elchert.net',
+				BODY_SIZE_LIMIT: '25M'
 			}
 		}
 	]
