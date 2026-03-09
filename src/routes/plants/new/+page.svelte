@@ -16,12 +16,17 @@
 	// Optional fields hidden behind "Add+" buttons
 	let showDates = $state(false);
 
+	// Next available planter ref suggestion
+	let nextPlanterRef: number | null = $state(null);
+
 	let formData = $state({
 		name: '',
 		variety: '',
 		category: 'want' as 'past' | 'want' | 'current',
 		plantType: '',
 		haveSeeds: false,
+		planterRef: '',
+		seedLocation: '',
 		plantingDate: '',
 		harvestDate: '',
 		spacing: '',
@@ -39,6 +44,24 @@
 		seedSource: '',
 		seedSourceUrl: '',
 		seedCost: ''
+	});
+
+	// When category switches to 'current', compute next available planter ref
+	$effect(() => {
+		if (formData.category === 'current') {
+			fetch('/api/plants?category=current')
+				.then((r) => r.json())
+				.then((currentPlants: { planterRef: number | null }[]) => {
+					const used = new Set(currentPlants.map((p) => p.planterRef).filter((n) => n != null));
+					let next = 1;
+					while (used.has(next)) next++;
+					nextPlanterRef = next;
+					if (!formData.planterRef) formData.planterRef = next.toString();
+				})
+				.catch(() => {});
+		} else {
+			nextPlanterRef = null;
+		}
 	});
 
 	function flashField(field: string) {
@@ -109,7 +132,9 @@
 					directSowWeeks: formData.directSowWeeks ? parseInt(formData.directSowWeeks) : null,
 					seedCost: formData.seedCost ? parseFloat(formData.seedCost) : null,
 					seedSource: formData.seedSource || null,
-					seedSourceUrl: formData.seedSourceUrl || null
+					seedSourceUrl: formData.seedSourceUrl || null,
+					planterRef: formData.planterRef ? parseInt(formData.planterRef) : null,
+					seedLocation: formData.seedLocation || null
 				})
 			});
 
@@ -231,6 +256,29 @@
 				Have Seeds
 			</label>
 		</div>
+		{#if formData.haveSeeds}
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Seed Location</label>
+				<input
+					type="text"
+					bind:value={formData.seedLocation}
+					placeholder="e.g., Red bin, Drawer 2"
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				/>
+			</div>
+		{/if}
+		{#if formData.category === 'current'}
+			<div>
+				<label class="mb-1 block text-sm font-medium text-slate-700">Seed Planter Reference #</label>
+				<input
+					type="number"
+					bind:value={formData.planterRef}
+					placeholder={nextPlanterRef != null ? `Next available: ${nextPlanterRef}` : 'e.g., 12'}
+					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+				/>
+				<p class="mt-1 text-xs text-slate-400">The number marked in your seed planter tray{nextPlanterRef != null ? ` · Next available: ${nextPlanterRef}` : ''}</p>
+			</div>
+		{/if}
 		{#if showDates}
 			<div>
 				<label class="mb-1 block text-sm font-medium text-slate-700">Planting Date</label>

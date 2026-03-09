@@ -32,6 +32,7 @@
 		category: 'want' as 'past' | 'want' | 'current',
 		plantType: '',
 		haveSeeds: false,
+		seedLocation: '',
 		planterRef: '',
 		plantingDate: '',
 		harvestDate: '',
@@ -78,6 +79,7 @@
 				category: (plant!.category as 'past' | 'want' | 'current') || 'want',
 				plantType: plant!.plantType || '',
 				haveSeeds: plant!.haveSeeds ?? false,
+				seedLocation: plant!.seedLocation || '',
 			planterRef: plant!.planterRef?.toString() || '',
 				plantingDate: plant!.plantingDate || '',
 				harvestDate: plant!.harvestDate || '',
@@ -143,7 +145,8 @@
 					directSowWeeks: formData.directSowWeeks ? parseInt(formData.directSowWeeks) : null,
 					seedCost: formData.seedCost ? parseFloat(formData.seedCost) : null,
 					seedSource: formData.seedSource || null,
-					seedSourceUrl: formData.seedSourceUrl || null
+					seedSourceUrl: formData.seedSourceUrl || null,
+					seedLocation: formData.seedLocation || null
 				})
 			});
 
@@ -310,7 +313,8 @@
 			planterRef: formData.planterRef ? parseInt(formData.planterRef) : null,
 			seedSource: formData.seedSource || null,
 			seedSourceUrl: formData.seedSourceUrl || null,
-			seedCost: formData.seedCost ? parseFloat(formData.seedCost) : null
+			seedCost: formData.seedCost ? parseFloat(formData.seedCost) : null,
+			seedLocation: formData.seedLocation || null
 		});
 		editingDetails = false;
 	}
@@ -432,6 +436,17 @@
 					Have Seeds
 				</label>
 			</div>
+			{#if formData.haveSeeds}
+				<div>
+					<label class="mb-1 block text-sm font-medium text-slate-700">Seed Location</label>
+					<input
+						type="text"
+						bind:value={formData.seedLocation}
+						placeholder="e.g., Red bin, Drawer 2"
+						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+					/>
+				</div>
+			{/if}
 			{#if formData.category === 'current'}
 				<div>
 					<label class="mb-1 block text-sm font-medium text-slate-700">Seed Planter Reference #</label>
@@ -819,6 +834,12 @@
 						<label class="mb-1 block text-xs font-medium text-slate-600">URL</label>
 						<input type="url" bind:value={formData.seedSourceUrl} placeholder="https://..." class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 					</div>
+					{#if formData.haveSeeds}
+						<div class="sm:col-span-2">
+							<label class="mb-1 block text-xs font-medium text-slate-600">Seed Location</label>
+							<input type="text" bind:value={formData.seedLocation} placeholder="e.g., Red bin, Drawer 2" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+						</div>
+					{/if}
 					{#if plant?.category === 'current'}
 						<div>
 							<label class="mb-1 block text-xs font-medium text-slate-600">Seed Planter Reference #</label>
@@ -839,10 +860,10 @@
 					</div>
 				</div>
 
-				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.planterRef != null}
+				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation || plant?.planterRef != null}
 					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate)}
 					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
-					{@const hasSeed = !!(plant?.seedSourceUrl)}
+					{@const hasSeed = !!(plant?.seedSourceUrl || plant?.seedLocation)}
 					<div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_1fr_0.95fr]">
 						{#if hasSchedule}
 							<div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
@@ -966,6 +987,12 @@
 											{plant?.seedSource || 'Seed Source'}
 											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
 										</a>
+									</div>
+								{/if}
+								{#if plant?.seedLocation}
+									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+										<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Location</p>
+										<p class="text-sm font-medium text-slate-700">{plant.seedLocation}</p>
 									</div>
 								{/if}
 								{#if plant?.planterRef != null}
