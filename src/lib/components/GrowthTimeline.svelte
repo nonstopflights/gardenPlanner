@@ -83,45 +83,13 @@
 		editEditor?.destroy();
 	});
 
-	interface DateGroup {
-		date: string;
-		label: string;
-		images: ImageEntry[];
-	}
-
-	let groupedImages: DateGroup[] = $derived.by(() => {
-		const sorted = [...images].sort((a, b) => {
+	let sortedImages: ImageEntry[] = $derived.by(() =>
+		[...images].sort((a, b) => {
 			const dateA = a.takenAt ?? a.uploadedAt;
 			const dateB = b.takenAt ?? b.uploadedAt;
 			return new Date(dateB).getTime() - new Date(dateA).getTime();
-		});
-
-		const groups = new Map<string, ImageEntry[]>();
-		for (const img of sorted) {
-			const raw = img.takenAt ?? img.uploadedAt;
-			const dateKey = raw.split('T')[0];
-			if (!groups.has(dateKey)) {
-				groups.set(dateKey, []);
-			}
-			groups.get(dateKey)!.push(img);
-		}
-
-		const result: DateGroup[] = [];
-		for (const [dateKey, imgs] of groups) {
-			const d = new Date(dateKey + 'T00:00:00');
-			result.push({
-				date: dateKey,
-				label: d.toLocaleDateString('en-US', {
-					weekday: 'long',
-					month: 'long',
-					day: 'numeric',
-					year: 'numeric'
-				}),
-				images: imgs
-			});
-		}
-		return result;
-	});
+		})
+	);
 
 	function normalizeEditorHtml(html: string): string {
 		const normalized = html.trim();
@@ -486,62 +454,54 @@
 		</div>
 	</div>
 
-	{#if groupedImages.length === 0}
+	{#if sortedImages.length === 0}
 		<p class="py-8 text-center text-sm text-slate-400">
 			No photos yet. Upload your first photo to start tracking growth.
 		</p>
 	{:else}
-		<div class="space-y-8">
-			{#each groupedImages as group (group.date)}
-				<div>
-					<h3 class="mb-3 text-sm font-semibold text-slate-500">{group.label}</h3>
-					<div class="grid gap-5 lg:grid-cols-2">
-						{#each group.images as img (img.id)}
-							<button
-								type="button"
-								onclick={() => openImageModal(img)}
-								class="group overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
-							>
-								<div class="flex h-80 items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(226,232,240,0.75),_rgba(248,250,252,0.95)_65%)] p-4">
-									<img
-										src={img.imagePath}
-										alt={editorPlainText(img.caption) || 'Plant photo'}
-										class="max-h-full w-full rounded-2xl object-contain shadow-[0_16px_40px_-24px_rgba(15,23,42,0.5)]"
-									/>
-									<div class="pointer-events-none absolute"></div>
-								</div>
-
-								<div class="space-y-3 px-5 py-4">
-									<div class="flex items-start justify-between gap-3">
-										<div class="min-w-0">
-											<p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-												{formatDate(img.takenAt ?? img.uploadedAt)}
-											</p>
-											{#if img.caption}
-												<p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
-													{editorPlainText(img.caption)}
-												</p>
-											{:else}
-												<p class="mt-2 text-sm italic text-slate-300">No caption yet</p>
-											{/if}
-										</div>
-										<span class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500">
-											Open
-										</span>
-									</div>
-
-									{#if img.seasonId}
-										<div class="mt-2 flex flex-wrap gap-1.5">
-											<span class="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
-												{seasonName(img.seasonId)}
-											</span>
-										</div>
-									{/if}
-								</div>
-							</button>
-						{/each}
+		<div class="grid gap-5 md:grid-cols-2">
+			{#each sortedImages as img (img.id)}
+				<button
+					type="button"
+					onclick={() => openImageModal(img)}
+					class="group overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
+				>
+					<div class="flex h-80 items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(226,232,240,0.75),_rgba(248,250,252,0.95)_65%)] p-4">
+						<img
+							src={img.imagePath}
+							alt={editorPlainText(img.caption) || 'Plant photo'}
+							class="max-h-full w-full rounded-2xl object-contain shadow-[0_16px_40px_-24px_rgba(15,23,42,0.5)]"
+						/>
 					</div>
-				</div>
+
+					<div class="space-y-3 px-5 py-4">
+						<div class="flex items-start justify-between gap-3">
+							<div class="min-w-0">
+								<p class="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+									{formatDate(img.takenAt ?? img.uploadedAt)}
+								</p>
+								{#if img.caption}
+									<p class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
+										{editorPlainText(img.caption)}
+									</p>
+								{:else}
+									<p class="mt-2 text-sm italic text-slate-300">No caption yet</p>
+								{/if}
+							</div>
+							<span class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-500">
+								Open
+							</span>
+						</div>
+
+						{#if img.seasonId}
+							<div class="mt-2 flex flex-wrap gap-1.5">
+								<span class="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700">
+									{seasonName(img.seasonId)}
+								</span>
+							</div>
+						{/if}
+					</div>
+				</button>
 			{/each}
 		</div>
 	{/if}

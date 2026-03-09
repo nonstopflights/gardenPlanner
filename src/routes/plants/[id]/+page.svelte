@@ -843,96 +843,106 @@
 					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate)}
 					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
 					{@const hasSeed = !!(plant?.seedSourceUrl)}
-					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-						<!-- Schedule column -->
+					<div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_1fr_0.95fr]">
 						{#if hasSchedule}
-							<div>
-								<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Schedule</p>
-								<div class="space-y-2">
+							<div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+								<p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Schedule</p>
+								<div class="space-y-3">
 									{#if plant?.plantingSeason}
-										<div class="flex items-center gap-2">
-											<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+										<div class="flex flex-wrap items-center gap-3">
+											<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold
 												{plant.plantingSeason === 'spring' ? 'bg-green-100 text-green-800' :
 												 plant.plantingSeason === 'fall' ? 'bg-orange-100 text-orange-800' :
 												 'bg-violet-100 text-violet-800'} capitalize">
 												{plant.plantingSeason}
 											</span>
 											{#if plant?.daysToMaturity}
-												<span class="text-sm text-slate-500">{plant.daysToMaturity} days to maturity</span>
+												<span class="text-lg font-medium text-slate-600">{plant.daysToMaturity} days to maturity</span>
 											{/if}
 										</div>
 									{:else if plant?.daysToMaturity}
-										<p class="text-sm text-slate-700">{plant.daysToMaturity} days to maturity</p>
+										<p class="text-lg font-medium text-slate-700">{plant.daysToMaturity} days to maturity</p>
 									{/if}
 									{#if plant?.startIndoorsWeeks != null}
-										<div class="flex items-start gap-2 text-sm">
-											<span class="mt-0.5 flex-shrink-0 text-slate-400">
+										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
+											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
 												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
 											</span>
-											<span class="text-slate-600">Start indoors <strong class="font-medium text-slate-800">{plant.startIndoorsWeeks} wks</strong> before last frost</span>
+											<span class="leading-6 text-slate-600">Start indoors <strong class="font-semibold text-slate-800">{plant.startIndoorsWeeks} wks</strong> before last frost</span>
 										</div>
 									{/if}
 									{#if plant?.transplantWeeks != null}
-										<div class="flex items-start gap-2 text-sm">
-											<span class="mt-0.5 flex-shrink-0 text-slate-400">
+										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
+											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
 												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
 											</span>
-											<span class="text-slate-600">Transplant <strong class="font-medium text-slate-800">{plant.transplantWeeks} wks</strong> after last frost</span>
+											<span class="leading-6 text-slate-600">Transplant <strong class="font-semibold text-slate-800">{plant.transplantWeeks} wks</strong> after last frost</span>
 										</div>
 									{/if}
 									{#if plant?.directSowWeeks != null}
-										<div class="flex items-start gap-2 text-sm">
-											<span class="mt-0.5 flex-shrink-0 text-slate-400">
+										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
+											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
 												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-10H21M3 12H2m15.07-7.07l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707" /></svg>
 											</span>
-											<span class="text-slate-600">Direct sow <strong class="font-medium text-slate-800">{plant.directSowWeeks} wks</strong> after last frost</span>
+											<span class="leading-6 text-slate-600">Direct sow <strong class="font-semibold text-slate-800">{plant.directSowWeeks} wks</strong> after last frost</span>
 										</div>
 									{/if}
-									{#if plant?.plantingDate}
-										<p class="text-sm text-slate-600">Plant on <strong class="font-medium text-slate-800">{plant.plantingDate}</strong></p>
-									{/if}
-									{#if plant?.harvestDate}
-										<p class="text-sm text-slate-600">Harvest by <strong class="font-medium text-slate-800">{plant.harvestDate}</strong></p>
+									{#if plant?.plantingDate || plant?.harvestDate}
+										<div class="grid gap-3 sm:grid-cols-2">
+											{#if plant?.plantingDate}
+												<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
+													<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Plant on</p>
+													<p class="mt-1 text-sm font-medium text-slate-700">{plant.plantingDate}</p>
+												</div>
+											{/if}
+											{#if plant?.harvestDate}
+												<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
+													<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Harvest by</p>
+													<p class="mt-1 text-sm font-medium text-slate-700">{plant.harvestDate}</p>
+												</div>
+											{/if}
+										</div>
 									{/if}
 								</div>
 							</div>
 						{/if}
 
-						<!-- Growing Conditions column -->
 						{#if hasGrowing}
-							<div>
-								<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Growing Conditions</p>
-								<div class="space-y-2">
-									{#if plant?.spacing}
-										<div class="flex items-center justify-between gap-4 text-sm">
-											<span class="text-slate-500">Spacing</span>
-											<span class="font-medium text-slate-800">{plant.spacing}</span>
-										</div>
-									{/if}
-									{#if plant?.sunRequirements}
-										<div class="flex items-center justify-between gap-4 text-sm">
-											<span class="text-slate-500">Sun</span>
-											<span class="font-medium text-slate-800">{plant.sunRequirements}</span>
-										</div>
-									{/if}
-									{#if plant?.waterNeeds}
-										<div class="flex items-center justify-between gap-4 text-sm">
-											<span class="text-slate-500">Water</span>
-											<span class="font-medium text-slate-800">{plant.waterNeeds}</span>
-										</div>
-									{/if}
-									{#if plant?.matureHeight}
-										<div class="flex items-center justify-between gap-4 text-sm">
-											<span class="text-slate-500">Height</span>
-											<span class="font-medium text-slate-800">{plant.matureHeight}</span>
-										</div>
-									{/if}
+							<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+								<p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Growing Conditions</p>
+								<div class="space-y-3">
+									<div class="grid gap-3">
+										{#if plant?.spacing}
+											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+												<span class="text-slate-500">Spacing</span>
+												<span class="font-semibold text-slate-800">{plant.spacing}</span>
+											</div>
+										{/if}
+										{#if plant?.sunRequirements}
+											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+												<span class="text-slate-500">Sun</span>
+												<span class="font-semibold text-slate-800">{plant.sunRequirements}</span>
+											</div>
+										{/if}
+										{#if plant?.waterNeeds}
+											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+												<span class="text-slate-500">Water</span>
+												<span class="font-semibold text-slate-800">{plant.waterNeeds}</span>
+											</div>
+										{/if}
+										{#if plant?.matureHeight}
+											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+												<span class="text-slate-500">Height</span>
+												<span class="font-semibold text-slate-800">{plant.matureHeight}</span>
+											</div>
+										{/if}
+									</div>
 									{#if plant?.companionPlants}
-										<div class="pt-1">
-											<p class="mb-1.5 text-xs text-slate-500">Companion Plants</p>
-											<div class="flex flex-wrap gap-1">
+										<div class="rounded-xl border border-slate-200 bg-white p-3">
+											<p class="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Companion Plants</p>
+											<div class="flex flex-wrap gap-2">
 												{#each plant.companionPlants.split(',') as companion}
-													<span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{companion.trim()}</span>
+													<span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{companion.trim()}</span>
 												{/each}
 											</div>
 										</div>
@@ -941,30 +951,32 @@
 							</div>
 						{/if}
 
-						<!-- Seed Source + Planter column -->
 						{#if hasSeed || plant?.planterRef != null}
-							<div class="flex flex-col gap-4">
+							<div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,_rgba(248,250,252,1),_rgba(241,245,249,0.9))] p-5">
 								{#if hasSeed}
-									<div>
-										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Seed Source</p>
+									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Source</p>
 										<a
 											href={plant?.seedSourceUrl}
 											target="_blank"
 											rel="noopener noreferrer"
 											onclick={(e) => e.stopPropagation()}
-											class="inline-flex items-center gap-1 text-sm font-medium text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
+											class="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
 										>
-											Seed Source
+											{plant?.seedSource || 'Seed Source'}
 											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
 										</a>
 									</div>
 								{/if}
 								{#if plant?.planterRef != null}
-									<div>
-										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Seed Planter</p>
+									<div class="rounded-xl bg-transparent">
+										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Planter</p>
 										<div class="flex items-center gap-3">
-											<span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-lg font-bold text-emerald-800">{plant.planterRef}</span>
-											<span class="text-sm text-slate-500">Tray reference</span>
+											<span class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-800">{plant.planterRef}</span>
+											<div>
+												<p class="text-lg font-medium text-slate-700">Tray reference</p>
+												<p class="text-sm text-slate-500">Seed starter slot</p>
+											</div>
 										</div>
 									</div>
 								{/if}
