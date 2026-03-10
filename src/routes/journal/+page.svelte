@@ -738,13 +738,13 @@
 		<div class="relative ml-3 border-l-2 border-slate-200 pl-6">
 			{#each groupedEntries as group (group.date)}
 				<!-- Date label -->
-				<div class="relative pb-2">
+				<div class="relative pb-3">
 					<div class="absolute -left-[29px] top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-400"></div>
 					<p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
 				</div>
 
 				<!-- Entries for that date -->
-				<div class="space-y-3 pb-6">
+				<div class="space-y-3 pb-10">
 					{#each group.entries as entry (entry.id)}
 						<JournalEntryCard
 							{entry}
