@@ -175,26 +175,27 @@
 			throw new Error('Canvas is not available for image compression');
 		}
 
+		// Leave headroom for multipart form-data overhead and caption text.
+		const maxUploadBytes = 430 * 1024;
 		let quality = 0.9;
 		let blob: Blob | null = null;
-		const targetSize = 2 * 1024 * 1024;
 
-		for (let attempt = 0; attempt < 6; attempt += 1) {
+		for (let attempt = 0; attempt < 10; attempt += 1) {
 			canvas.width = width;
 			canvas.height = height;
 			context.clearRect(0, 0, width, height);
 			context.drawImage(source, 0, 0, width, height);
 			blob = await canvasToBlob(canvas, quality);
 
-			if (blob.size <= targetSize || (quality <= 0.72 && attempt >= 3)) {
+			if (blob.size <= maxUploadBytes) {
 				break;
 			}
 
-			if (attempt % 2 === 1) {
-				width = Math.max(1200, Math.round(width * 0.88));
-				height = Math.max(1200, Math.round(height * 0.88));
+			if (attempt % 3 === 2) {
+				width = Math.max(900, Math.round(width * 0.84));
+				height = Math.max(900, Math.round(height * 0.84));
 			} else {
-				quality = Math.max(0.72, quality - 0.08);
+				quality = Math.max(0.55, quality - 0.08);
 			}
 		}
 
@@ -211,6 +212,12 @@
 			type: 'image/jpeg',
 			lastModified: Date.now()
 		});
+
+		if (compressedFile.size > maxUploadBytes) {
+			throw new Error(
+				`Compressed image is still ${formatBytes(compressedFile.size)}. Please crop it a bit and try again.`
+			);
+		}
 
 		const message =
 			compressedFile.size < file.size

@@ -6,15 +6,27 @@ export const GET: RequestHandler = async ({ url }) => {
 	try {
 		const seasonIdParam = url.searchParams.get('seasonId');
 		const seasonId = seasonIdParam ? parseInt(seasonIdParam) : undefined;
-		
-		const [activeSeason, plants, beds, recentJournal, recentActivities, plantImageMap] = await Promise.all([
+
+		const [activeSeason, plants, beds, recentJournal, recentActivities, plantImageMap, plantingActivities] = await Promise.all([
 			seasonId ? queries.getSeasonById(seasonId) : queries.getActiveSeason(),
 			queries.getAllPlants(),
 			queries.getAllBeds(),
 			queries.getRecentJournalEntries(5, seasonId),
 			queries.getRecentActivities(10, seasonId),
-			queries.getAllPlantFirstImages()
+			queries.getAllPlantFirstImages(),
+			queries.getAllPlantingActivities(seasonId)
 		]);
+
+		// Plant IDs that have been seeded (start indoors / direct sow done)
+		const seededPlantIds = plantingActivities
+			.filter((a: any) => a.sourceType === 'seed')
+			.map((a: any) => a.plantId);
+		// Plant IDs that have been transplanted
+		const transplantedPlantIds = plantingActivities
+			.filter((a: any) => a.sourceType === 'transplant')
+			.map((a: any) => a.plantId);
+		// All planted plant IDs (either seed or transplant)
+		const plantedPlantIds = plantingActivities.map((a: any) => a.plantId);
 
 		const totalPlants = plants.length;
 		const currentPlants = plants.filter((p: any) => p.category === 'current').length;
@@ -45,6 +57,9 @@ export const GET: RequestHandler = async ({ url }) => {
 				totalBeds
 			},
 			plants,
+			plantedPlantIds,
+			seededPlantIds,
+			transplantedPlantIds,
 			plantImageMap,
 			recentJournal,
 			recentActivities,

@@ -53,6 +53,8 @@
 	let upcomingHarvests = $derived(dashboardData?.upcomingHarvests ?? []);
 	let allPlants = $derived(dashboardData?.plants ?? []);
 	let plantImageMap: Record<number, string> = $derived(dashboardData?.plantImageMap ?? {});
+	let seededPlantIds = $derived<Set<number>>(new Set(dashboardData?.seededPlantIds ?? []));
+	let transplantedPlantIds = $derived<Set<number>>(new Set(dashboardData?.transplantedPlantIds ?? []));
 
 	function daysUntilHarvest(harvestDate: string): number {
 		const now = new Date();
@@ -100,8 +102,8 @@
 				? frostDate(FIRST_FROST_MONTH, FIRST_FROST_DAY)
 				: frostDate(LAST_FROST_MONTH, LAST_FROST_DAY);
 
-			// Start Indoors
-			if (plant.startIndoorsWeeks != null) {
+			// Start Indoors — skip if already seeded
+			if (plant.startIndoorsWeeks != null && !seededPlantIds.has(plant.id)) {
 				const target = addWeeks(baseFrost, -plant.startIndoorsWeeks);
 				if (target.getTime() - windowPadding <= twoWeeksOut.getTime() &&
 					target.getTime() + windowPadding >= today.getTime()) {
@@ -116,8 +118,8 @@
 				}
 			}
 
-			// Transplant
-			if (plant.transplantWeeks != null) {
+			// Transplant — skip if already transplanted
+			if (plant.transplantWeeks != null && !transplantedPlantIds.has(plant.id)) {
 				const target = isFall
 					? addWeeks(baseFrost, -plant.transplantWeeks)
 					: addWeeks(baseFrost, plant.transplantWeeks);
@@ -134,8 +136,8 @@
 				}
 			}
 
-			// Direct Sow
-			if (plant.directSowWeeks != null) {
+			// Direct Sow — skip if already seeded
+			if (plant.directSowWeeks != null && !seededPlantIds.has(plant.id)) {
 				const target = isFall
 					? addWeeks(baseFrost, -plant.directSowWeeks)
 					: addWeeks(baseFrost, plant.directSowWeeks);
