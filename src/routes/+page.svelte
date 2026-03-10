@@ -53,8 +53,22 @@
 	let upcomingHarvests = $derived(dashboardData?.upcomingHarvests ?? []);
 	let allPlants = $derived(dashboardData?.plants ?? []);
 	let plantImageMap: Record<number, string> = $derived(dashboardData?.plantImageMap ?? {});
-	let seededPlantIds = $derived<Set<number>>(new Set(dashboardData?.seededPlantIds ?? []));
-	let transplantedPlantIds = $derived<Set<number>>(new Set(dashboardData?.transplantedPlantIds ?? []));
+	let plantedPlantIds = $derived<Set<number>>(new Set(dashboardData?.plantedPlantIds ?? []));
+
+	async function markTaskDone(task: WeeklyTask) {
+		const season = get(activeSeason);
+		await fetch(`/api/plants/${task.plantId}/activities`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				activityType: 'planted',
+				activityDate: new Date().toISOString().split('T')[0],
+				seasonId: season?.id ?? null,
+				description: `${task.taskType} completed`
+			})
+		});
+		await loadDashboard();
+	}
 
 	function daysUntilHarvest(harvestDate: string): number {
 		const now = new Date();
@@ -102,8 +116,8 @@
 				? frostDate(FIRST_FROST_MONTH, FIRST_FROST_DAY)
 				: frostDate(LAST_FROST_MONTH, LAST_FROST_DAY);
 
-			// Start Indoors — skip if already seeded
-			if (plant.startIndoorsWeeks != null && !seededPlantIds.has(plant.id)) {
+			// Start Indoors — skip if already planted
+			if (plant.startIndoorsWeeks != null && !plantedPlantIds.has(plant.id)) {
 				const target = addWeeks(baseFrost, -plant.startIndoorsWeeks);
 				if (target.getTime() - windowPadding <= twoWeeksOut.getTime() &&
 					target.getTime() + windowPadding >= today.getTime()) {
@@ -118,8 +132,8 @@
 				}
 			}
 
-			// Transplant — skip if already transplanted
-			if (plant.transplantWeeks != null && !transplantedPlantIds.has(plant.id)) {
+			// Transplant — skip if already planted
+			if (plant.transplantWeeks != null && !plantedPlantIds.has(plant.id)) {
 				const target = isFall
 					? addWeeks(baseFrost, -plant.transplantWeeks)
 					: addWeeks(baseFrost, plant.transplantWeeks);
@@ -136,8 +150,8 @@
 				}
 			}
 
-			// Direct Sow — skip if already seeded
-			if (plant.directSowWeeks != null && !seededPlantIds.has(plant.id)) {
+			// Direct Sow — skip if already planted
+			if (plant.directSowWeeks != null && !plantedPlantIds.has(plant.id)) {
 				const target = isFall
 					? addWeeks(baseFrost, -plant.directSowWeeks)
 					: addWeeks(baseFrost, plant.directSowWeeks);
@@ -231,38 +245,49 @@
 		{:else}
 			<div class="space-y-2">
 				{#each weeklyTasks as task (task.plantId + '-' + task.taskType)}
-					<a
-						href="/plants/{task.plantId}"
-						class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 sm:px-4 py-2.5 transition-shadow hover:shadow-sm"
-					>
-						<div class="flex items-center gap-2.5 min-w-0 flex-1">
-							{#if plantImageMap[task.plantId]}
-								<img
-									src={plantImageMap[task.plantId]}
-									alt={task.plantName}
-									class="h-8 w-8 flex-shrink-0 rounded-md object-cover"
-								/>
-							{:else}
-								<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-slate-100 text-sm">
-									🌱
-								</div>
-							{/if}
-							<span
-								class="flex-shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold {task.badgeClass}"
-							>
-								{task.taskType}
-							</span>
-							<div class="min-w-0">
-								<p class="truncate text-sm font-medium text-slate-900">{task.plantName}</p>
-								{#if task.plantVariety}
-									<p class="truncate text-xs text-slate-400">{task.plantVariety}</p>
+					<div class="flex items-center gap-2">
+						<a
+							href="/plants/{task.plantId}"
+							class="flex flex-1 items-center justify-between rounded-lg border border-slate-200 bg-white px-3 sm:px-4 py-2.5 transition-shadow hover:shadow-sm min-w-0"
+						>
+							<div class="flex items-center gap-2.5 min-w-0 flex-1">
+								{#if plantImageMap[task.plantId]}
+									<img
+										src={plantImageMap[task.plantId]}
+										alt={task.plantName}
+										class="h-8 w-8 flex-shrink-0 rounded-md object-cover"
+									/>
+								{:else}
+									<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-slate-100 text-sm">
+										🌱
+									</div>
 								{/if}
+								<span
+									class="flex-shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold {task.badgeClass}"
+								>
+									{task.taskType}
+								</span>
+								<div class="min-w-0">
+									<p class="truncate text-sm font-medium text-slate-900">{task.plantName}</p>
+									{#if task.plantVariety}
+										<p class="truncate text-xs text-slate-400">{task.plantVariety}</p>
+									{/if}
+								</div>
 							</div>
-						</div>
-						<span class="ml-3 flex-shrink-0 text-xs font-medium text-slate-500">
-							{formatTaskDate(task.targetDate)}
-						</span>
-					</a>
+							<span class="ml-3 flex-shrink-0 text-xs font-medium text-slate-500">
+								{formatTaskDate(task.targetDate)}
+							</span>
+						</a>
+						<button
+							onclick={() => markTaskDone(task)}
+							title="Mark as done"
+							class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600"
+						>
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+							</svg>
+						</button>
+					</div>
 				{/each}
 			</div>
 		{/if}
