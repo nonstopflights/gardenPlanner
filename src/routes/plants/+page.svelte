@@ -8,6 +8,7 @@
 	let plants: Plant[] = $state([]);
 	let plantImages: Record<number, string> = $state({});
 	let calendarPlants: Plant[] = $state([]);
+	let seedMapSort = $state<'ref' | 'name'>('ref');
 
 	onMount(async () => {
 		await loadData();
@@ -64,11 +65,26 @@
 	{#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
 		<div class="w-72 flex-shrink-0 rounded-2xl border border-stone-200 bg-stone-50 p-5">
 			<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
-			<p class="mb-4 text-sm text-stone-500">Currently planted varieties and their tray reference numbers.</p>
+			<div class="mb-4 flex items-center gap-1">
+				<button
+					onclick={() => (seedMapSort = 'ref')}
+					class="rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition {seedMapSort === 'ref' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-700'}"
+				>
+					By #
+				</button>
+				<button
+					onclick={() => (seedMapSort = 'name')}
+					class="rounded-full border px-2.5 py-0.5 text-[11px] font-semibold transition {seedMapSort === 'name' ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300 hover:text-stone-700'}"
+				>
+					A–Z
+				</button>
+			</div>
 			<div class="flex flex-col gap-2">
 				{#each plants
 					.filter((p) => p.category === 'current' && p.planterRef != null)
-					.sort((a, b) => (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
+					.sort((a, b) => seedMapSort === 'name'
+						? a.name.localeCompare(b.name)
+						: (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
 					<a
 						href="/plants/{plant.id}"
 						class="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
