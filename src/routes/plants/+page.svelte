@@ -49,59 +49,45 @@
 	}
 </script>
 
-<div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-	<div>
-		<h1 class="font-display text-2xl font-semibold text-slate-900">Plant Library</h1>
-		<p class="mt-0.5 text-sm text-stone-500">Curate varieties before placing them in beds.</p>
+<div class="flex items-start gap-8">
+	<div class="min-w-0 flex-1">
+		<PlantLibrary
+			{plants}
+			images={plantImages}
+			onPlantClick={handlePlantClick}
+			onAddPlant={() => goto('/plants/new')}
+			onFilteredChange={(filtered) => (calendarPlants = filtered)}
+		/>
 	</div>
-	<div class="flex flex-shrink-0 items-center gap-4 rounded-xl border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-stone-600">
-		<span class="flex items-center gap-1.5">
-			<span class="h-2 w-2 rounded-full bg-red-300"></span>
-			Last frost <strong class="font-semibold text-stone-800">Apr 28</strong>
-		</span>
-		<span class="text-stone-300">·</span>
-		<span class="flex items-center gap-1.5">
-			<span class="h-2 w-2 rounded-full bg-blue-300"></span>
-			First frost <strong class="font-semibold text-stone-800">Oct 11</strong>
-		</span>
-	</div>
-</div>
 
-<PlantLibrary
-	{plants}
-	images={plantImages}
-	onPlantClick={handlePlantClick}
-	onAddPlant={() => goto('/plants/new')}
-	onFilteredChange={(filtered) => (calendarPlants = filtered)}
-/>
-
-<!-- Seed Planter Reference Map -->
-{#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
-	<div class="mt-8 rounded-2xl border border-stone-200 bg-stone-50 p-6">
-		<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
-		<p class="mb-4 text-sm text-stone-500">Currently planted varieties and their tray reference numbers.</p>
-		<div class="flex flex-wrap gap-3">
-			{#each plants
-				.filter((p) => p.category === 'current' && p.planterRef != null)
-				.sort((a, b) => (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
-			<a
-				href="/plants/{plant.id}"
-				class="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
-			>
-					<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
-						{plant.planterRef}
-					</span>
-					<div class="min-w-0">
-						<p class="font-medium text-slate-800 leading-tight">{plant.name}</p>
-						{#if plant.variety}
-							<p class="text-xs text-slate-400 truncate">{plant.variety}</p>
-						{/if}
-					</div>
-				</a>
-			{/each}
+	<!-- Seed Planter Reference Map -->
+	{#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
+		<div class="w-72 flex-shrink-0 rounded-2xl border border-stone-200 bg-stone-50 p-5">
+			<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
+			<p class="mb-4 text-sm text-stone-500">Currently planted varieties and their tray reference numbers.</p>
+			<div class="flex flex-col gap-2">
+				{#each plants
+					.filter((p) => p.category === 'current' && p.planterRef != null)
+					.sort((a, b) => (a.planterRef ?? 0) - (b.planterRef ?? 0)) as plant (plant.id)}
+					<a
+						href="/plants/{plant.id}"
+						class="flex items-center gap-2.5 rounded-xl border border-stone-200 bg-white px-3 py-2 text-sm transition hover:border-emerald-300 hover:bg-emerald-50"
+					>
+						<span class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">
+							{plant.planterRef}
+						</span>
+						<div class="min-w-0">
+							<p class="font-medium text-slate-800 leading-tight">{plant.name}</p>
+							{#if plant.variety}
+								<p class="text-xs text-slate-400 truncate">{plant.variety}</p>
+							{/if}
+						</div>
+					</a>
+				{/each}
+			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
+</div>
 
 <!-- Planting Calendar -->
 <div class="mt-8">
