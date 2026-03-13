@@ -428,7 +428,7 @@
 			{/if}
 			{#if formData.category === 'current'}
 				<div>
-					<label class="mb-1 block text-sm font-medium text-slate-700">Seed Planter Reference #</label>
+					<label class="mb-1 block text-sm font-medium text-slate-700">Seed Slot #</label>
 					<input
 						type="number"
 						bind:value={formData.planterRef}
@@ -617,32 +617,36 @@
 				</div>
 			{/if}
 			<div class="flex-1 min-w-0">
-				<div>
-					<h1 class="text-xl sm:text-2xl font-bold text-slate-900">{plant.name}</h1>
-					{#if plant.variety}
-						<p class="mt-0.5 text-sm sm:text-base text-slate-500">{plant.variety}</p>
-					{/if}
-					<div class="mt-2 flex flex-wrap items-center gap-1.5">
-						<span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
-							{plant.category === 'want' ? 'Want to Plant' : plant.category}
-						</span>
-						{#if plant.plantType}
-							<span class="inline-block rounded-full border border-purple-200 bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700">
-								{plant.plantType}
-							</span>
+				<div class="flex items-start justify-between gap-4">
+					<div class="min-w-0 flex-1">
+						<h1 class="text-xl sm:text-2xl font-bold text-slate-900">{plant.name}</h1>
+						{#if plant.variety}
+							<p class="mt-0.5 text-sm sm:text-base text-slate-500">{plant.variety}</p>
 						{/if}
-						{#if plant.haveSeeds}
-							<span class="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
-								Have Seeds
+						<div class="mt-2 flex flex-wrap items-center gap-1.5">
+							<span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium capitalize {categoryBadgeClass(plant.category)}">
+								{plant.category === 'want' ? 'Want to Plant' : plant.category}
 							</span>
-						{/if}
-						{#if plant.planterRef != null}
-							<span class="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-								<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
-								Planter #{plant.planterRef}
-							</span>
-						{/if}
+							{#if plant.plantType}
+								<span class="inline-block rounded-full border border-purple-200 bg-purple-50 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+									{plant.plantType}
+								</span>
+							{/if}
+							{#if plant.haveSeeds}
+								<span class="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+									Have Seeds
+								</span>
+							{/if}
+						</div>
 					</div>
+					{#if plant.planterRef != null}
+						<div class="flex flex-shrink-0 flex-col items-center gap-1">
+							<span class="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-2xl font-bold text-emerald-800">
+								{plant.planterRef}
+							</span>
+							<p class="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Seed slot</p>
+						</div>
+					{/if}
 				</div>
 				<div class="mt-3 flex flex-wrap gap-2">
 					<button
@@ -765,7 +769,7 @@
 					{/if}
 					{#if plant?.category === 'current'}
 						<div>
-							<label class="mb-1 block text-xs font-medium text-slate-600">Seed Planter Reference #</label>
+							<label class="mb-1 block text-xs font-medium text-slate-600">Seed Slot #</label>
 							<input type="number" bind:value={formData.planterRef} placeholder="e.g., 12" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 						</div>
 					{/if}
@@ -783,7 +787,7 @@
 					</div>
 				</div>
 
-				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation || plant?.planterRef != null}
+				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation }
 					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate)}
 					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
 					{@const hasSeed = !!(plant?.seedSourceUrl || plant?.seedLocation)}
@@ -871,7 +875,7 @@
 							</div>
 						{/if}
 
-						{#if hasSeed || plant?.planterRef != null}
+						{#if hasSeed }
 							<div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,_rgba(248,250,252,1),_rgba(241,245,249,0.9))] p-5">
 								{#if hasSeed}
 									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
@@ -892,18 +896,6 @@
 									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
 										<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Location</p>
 										<p class="text-sm font-medium text-slate-700">{plant.seedLocation}</p>
-									</div>
-								{/if}
-								{#if plant?.planterRef != null}
-									<div class="rounded-xl bg-transparent">
-										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Planter</p>
-										<div class="flex items-center gap-3">
-											<span class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-3xl font-bold text-emerald-800">{plant.planterRef}</span>
-											<div>
-												<p class="text-lg font-medium text-slate-700">Tray reference</p>
-												<p class="text-sm text-slate-500">Seed starter slot</p>
-											</div>
-										</div>
 									</div>
 								{/if}
 							</div>
