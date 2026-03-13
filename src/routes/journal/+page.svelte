@@ -2,6 +2,8 @@
 	import { activeSeason } from '$lib/stores/season';
 	import JournalEntryCard from '$lib/components/JournalEntryCard.svelte';
 	import JournalEntryDetailModal from '$lib/components/JournalEntryDetailModal.svelte';
+	import JournalCalendar from '$lib/components/JournalCalendar.svelte';
+	import TiptapEditor from '$lib/components/TiptapEditor.svelte';
 	import type { JournalEntry, JournalImage, Plant, Bed } from '$lib/db/queries';
 	import { ZONES } from '$lib/utils/zones';
 
@@ -11,7 +13,6 @@
 	let searchQuery = $state('');
 	let loading = $state(false);
 
-	// Images per entry (keyed by entry ID)
 	let entryImages: Map<number, JournalImage[]> = $state(new Map());
 	let allBeds: Bed[] = $state([]);
 
@@ -29,6 +30,12 @@
 	let existingPhotos: JournalImage[] = $state([]);
 	let photosToDelete: number[] = $state([]);
 	let fileInput: HTMLInputElement;
+
+	// Tag filter
+	let selectedTags = $state<string[]>([]);
+
+	// Date filter (from calendar)
+	let dateFilter = $state<string | null>(null);
 
 	// Planting log state
 	interface PlantingEntry {
@@ -50,10 +57,8 @@
 	let plantingDescription = $state('');
 	let savingPlanting = $state(false);
 
-	// Debounced search
 	let searchTimeout: ReturnType<typeof setTimeout> | undefined;
 
-	// Reload entries when the active season changes
 	$effect(() => {
 		const season = $activeSeason;
 		loadEntries();
@@ -65,9 +70,7 @@
 	async function loadPlants() {
 		try {
 			const res = await fetch('/api/plants');
-			if (res.ok) {
-				allPlants = await res.json();
-			}
+			if (res.ok) allPlants = await res.json();
 		} catch (err) {
 			console.error('Failed to load plants:', err);
 		}
@@ -83,10 +86,7 @@
 	}
 
 	async function loadEntryImages() {
-		if (entries.length === 0) {
-			entryImages = new Map();
-			return;
-		}
+		if (entries.length === 0) { entryImages = new Map(); return; }
 		try {
 			const ids = entries.map((e) => e.id).join(',');
 			const res = await fetch(`/api/journal/images?entryIds=${ids}`);
@@ -108,13 +108,9 @@
 	async function loadPlantingLog() {
 		try {
 			const params = new URLSearchParams();
-			if ($activeSeason?.id) {
-				params.set('seasonId', $activeSeason.id.toString());
-			}
+			if ($activeSeason?.id) params.set('seasonId', $activeSeason.id.toString());
 			const res = await fetch(`/api/activities?${params}`);
-			if (res.ok) {
-				plantingEntries = await res.json();
-			}
+			if (res.ok) plantingEntries = await res.json();
 		} catch (err) {
 			console.error('Failed to load planting log:', err);
 		}
@@ -124,12 +120,8 @@
 		loading = true;
 		try {
 			const params = new URLSearchParams();
-			if ($activeSeason?.id) {
-				params.set('seasonId', $activeSeason.id.toString());
-			}
-			if (searchQuery.trim()) {
-				params.set('search', searchQuery.trim());
-			}
+			if ($activeSeason?.id) params.set('seasonId', $activeSeason.id.toString());
+			if (searchQuery.trim()) params.set('search', searchQuery.trim());
 			const res = await fetch(`/api/journal?${params}`);
 			if (res.ok) {
 				entries = await res.json();
@@ -145,9 +137,7 @@
 	function handleSearchInput(value: string) {
 		searchQuery = value;
 		clearTimeout(searchTimeout);
-		searchTimeout = setTimeout(() => {
-			loadEntries();
-		}, 300);
+		searchTimeout = setTimeout(() => { loadEntries(); }, 300);
 	}
 
 	function openNewForm() {
@@ -186,14 +176,11 @@
 		if (!formTitle.trim() || !formDate) return;
 		saving = true;
 
-		const tagsArray = formTags
-			.split(',')
-			.map((t) => t.trim())
-			.filter(Boolean);
+		const tagsArray = formTags.split(',').map((t) => t.trim()).filter(Boolean);
 
 		const body = {
 			title: formTitle.trim(),
-			content: formContent.trim(),
+			content: formContent,
 			entryDate: formDate,
 			tags: tagsArray.length > 0 ? JSON.stringify(tagsArray) : null,
 			seasonId: $activeSeason?.id ?? null
@@ -221,7 +208,6 @@
 				entryId = created.id;
 			}
 
-			// Upload new photos
 			for (const file of formPhotos) {
 				const fd = new FormData();
 				fd.append('image', file);
@@ -232,10 +218,8 @@
 				}
 			}
 
-			// Delete removed photos
 			for (const imageId of photosToDelete) {
-				const delRes = await fetch(`/api/journal/${entryId}/images/${imageId}`, { method: 'DELETE' });
-				if (!delRes.ok) throw new Error('Failed to delete photo');
+				await fetch(`/api/journal/${entryId}/images/${imageId}`, { method: 'DELETE' });
 			}
 
 			showForm = false;
@@ -262,7 +246,6 @@
 			if (res.ok) {
 				const updated = await res.json();
 				existingPhotos = existingPhotos.map((p) => (p.id === photo.id ? updated : p));
-				// Also update the main images map
 				const list = entryImages.get(entryId) ?? [];
 				entryImages.set(entryId, list.map((p) => (p.id === photo.id ? updated : p)));
 				entryImages = new Map(entryImages);
@@ -288,18 +271,13 @@
 		photosToDelete = [...photosToDelete, id];
 	}
 
-	let visibleExistingPhotos = $derived(
-		existingPhotos.filter((p) => !photosToDelete.includes(p.id))
-	);
+	let visibleExistingPhotos = $derived(existingPhotos.filter((p) => !photosToDelete.includes(p.id)));
 
 	async function deleteEntry(id: number) {
 		try {
 			const res = await fetch(`/api/journal/${id}`, { method: 'DELETE' });
 			if (res.ok) {
-				if (modalEntry?.id === id) {
-					modalOpen = false;
-					modalEntry = null;
-				}
+				if (modalEntry?.id === id) { modalOpen = false; modalEntry = null; }
 				await loadEntries();
 			}
 		} catch (err) {
@@ -312,20 +290,12 @@
 		modalOpen = true;
 	}
 
-	async function saveModalEntry(data: {
-		title: string;
-		content: string;
-		entryDate: string;
-		tags: string | null;
-	}) {
+	async function saveModalEntry(data: { title: string; content: string; entryDate: string; tags: string | null }) {
 		if (!modalEntry) return;
 		const res = await fetch(`/api/journal/${modalEntry.id}`, {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				...data,
-				seasonId: $activeSeason?.id ?? null
-			})
+			body: JSON.stringify({ ...data, seasonId: $activeSeason?.id ?? null })
 		});
 		if (!res.ok) throw new Error('Failed to update');
 		modalEntry = { ...modalEntry, ...data };
@@ -335,10 +305,8 @@
 	async function refreshModalImages() {
 		if (!modalEntry) return;
 		await loadEntryImages();
-		// Keep modalEntry but images will update via entryImages
 	}
 
-	// Planting log functions
 	function openPlantingForm() {
 		plantingPlantId = '';
 		plantingDate = new Date().toISOString().split('T')[0];
@@ -354,7 +322,6 @@
 	async function savePlanting() {
 		if (!plantingPlantId || !plantingDate) return;
 		savingPlanting = true;
-
 		try {
 			const res = await fetch(`/api/plants/${plantingPlantId}/activities`, {
 				method: 'POST',
@@ -380,9 +347,7 @@
 	async function deletePlanting(id: number) {
 		try {
 			const res = await fetch(`/api/activities/${id}`, { method: 'DELETE' });
-			if (res.ok) {
-				await loadPlantingLog();
-			}
+			if (res.ok) await loadPlantingLog();
 		} catch (err) {
 			console.error('Failed to delete planting entry:', err);
 		}
@@ -398,24 +363,85 @@
 		return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 	}
 
-	let groupedEntries = $derived.by(() => {
-		const groups: { date: string; label: string; entries: JournalEntry[] }[] = [];
-		const map = new Map<string, JournalEntry[]>();
+	// Tag utilities
+	const TAG_COLORS = [
+		'border-sky-200 bg-sky-50 text-sky-700',
+		'border-emerald-200 bg-emerald-50 text-emerald-700',
+		'border-amber-200 bg-amber-50 text-amber-700',
+		'border-violet-200 bg-violet-50 text-violet-700',
+		'border-rose-200 bg-rose-50 text-rose-700',
+		'border-teal-200 bg-teal-50 text-teal-700'
+	];
 
-		for (const entry of entries) {
-			const key = entry.entryDate;
-			if (!map.has(key)) {
-				map.set(key, []);
-			}
-			map.get(key)!.push(entry);
+	function tagColor(tag: string): string {
+		let hash = 0;
+		for (let i = 0; i < tag.length; i++) {
+			hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+		}
+		return TAG_COLORS[Math.abs(hash) % TAG_COLORS.length];
+	}
+
+	let allTags = $derived.by(() => {
+		const tags = new Set<string>();
+		for (const e of entries) {
+			if (e.tags) (JSON.parse(e.tags) as string[]).forEach((t) => tags.add(t));
+		}
+		return [...tags].sort();
+	});
+
+	function toggleTag(tag: string) {
+		if (selectedTags.includes(tag)) {
+			selectedTags = selectedTags.filter((t) => t !== tag);
+		} else {
+			selectedTags = [...selectedTags, tag];
+		}
+	}
+
+	// All dates that have entries (for calendar)
+	let datesWithEntries = $derived.by(() => {
+		const dates = new Set<string>();
+		for (const e of entries) dates.add(e.entryDate);
+		for (const e of plantingEntries) dates.add(e.activityDate);
+		return dates;
+	});
+
+	// Unified timeline: merge journal entries + planting entries, filter, group by date
+	type MergedItem =
+		| { kind: 'journal'; entry: JournalEntry }
+		| { kind: 'planting'; entry: PlantingEntry };
+
+	let groupedTimeline = $derived.by(() => {
+		// Filter journal entries by selected tags
+		let filteredJournal = entries;
+		if (selectedTags.length > 0) {
+			filteredJournal = entries.filter((e) => {
+				if (!e.tags) return false;
+				const eTags: string[] = JSON.parse(e.tags);
+				return selectedTags.some((t) => eTags.includes(t));
+			});
 		}
 
-		for (const [date, dateEntries] of map) {
-			groups.push({
-				date,
-				label: formatTimelineDate(date),
-				entries: dateEntries
-			});
+		// Build merged item list (hide planting entries when tag-filtering)
+		const items: MergedItem[] = [
+			...filteredJournal.map((e) => ({ kind: 'journal' as const, entry: e })),
+			...(selectedTags.length === 0
+				? plantingEntries.map((e) => ({ kind: 'planting' as const, entry: e }))
+				: [])
+		];
+
+		// Group by date
+		const map = new Map<string, MergedItem[]>();
+		for (const item of items) {
+			const date = item.kind === 'journal' ? item.entry.entryDate : item.entry.activityDate;
+			if (!map.has(date)) map.set(date, []);
+			map.get(date)!.push(item);
+		}
+
+		// Apply date filter from calendar
+		const groups: { date: string; label: string; items: MergedItem[] }[] = [];
+		for (const [date, dateItems] of map) {
+			if (dateFilter && date !== dateFilter) continue;
+			groups.push({ date, label: formatTimelineDate(date), items: dateItems });
 		}
 
 		groups.sort((a, b) => b.date.localeCompare(a.date));
@@ -514,41 +540,6 @@
 		</div>
 	{/if}
 
-	<!-- Planting Log -->
-	{#if plantingEntries.length > 0}
-		<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-			<h2 class="mb-3 text-sm font-semibold text-slate-900">Planting Log</h2>
-			<div class="space-y-2">
-				{#each plantingEntries as entry (entry.id)}
-					<div class="group flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-2.5">
-						<div class="flex flex-wrap items-center gap-2">
-							<span class="text-sm font-medium text-slate-700">{entry.plantName}</span>
-							{#if entry.plantVariety}
-								<span class="text-sm text-slate-400">{entry.plantVariety}</span>
-							{/if}
-							<span class="rounded-full border px-2 py-0.5 text-xs font-medium capitalize {entry.sourceType === 'seed' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}">
-								{entry.sourceType ?? 'planted'}
-							</span>
-							<span class="text-xs text-slate-400">{formatDate(entry.activityDate)}</span>
-							{#if entry.description}
-								<span class="text-xs text-slate-500">— {entry.description}</span>
-							{/if}
-						</div>
-						<button
-							onclick={() => deletePlanting(entry.id)}
-							class="flex-shrink-0 rounded p-1 text-slate-300 opacity-0 transition-all hover:bg-slate-100 hover:text-slate-600 group-hover:opacity-100"
-							aria-label="Delete planting entry"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-							</svg>
-						</button>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-
 	<!-- Search bar -->
 	<div class="relative">
 		<svg
@@ -557,12 +548,7 @@
 			stroke="currentColor"
 			viewBox="0 0 24 24"
 		>
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-			/>
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 		</svg>
 		<input
 			type="text"
@@ -572,6 +558,29 @@
 			class="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-700 placeholder-slate-400 shadow-sm transition focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
 		/>
 	</div>
+
+	<!-- Tag filter chips -->
+	{#if allTags.length > 0}
+		<div class="flex flex-wrap items-center gap-2">
+			<span class="text-xs font-medium text-slate-400">Filter by tag:</span>
+			{#each allTags as tag}
+				<button
+					onclick={() => toggleTag(tag)}
+					class="rounded-full border px-2.5 py-0.5 text-xs font-medium transition {selectedTags.includes(tag) ? tagColor(tag) + ' ring-1 ring-offset-1 ring-current' : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700'}"
+				>
+					{tag}
+				</button>
+			{/each}
+			{#if selectedTags.length > 0}
+				<button
+					onclick={() => (selectedTags = [])}
+					class="text-xs text-slate-400 hover:text-slate-600"
+				>
+					Clear
+				</button>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Inline create / edit form -->
 	{#if showForm}
@@ -586,12 +595,14 @@
 					bind:value={formTitle}
 					class="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
 				/>
-				<textarea
-					placeholder="Write your notes..."
-					bind:value={formContent}
-					rows="4"
-					class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-				></textarea>
+
+				{#key editingEntry?.id ?? 'new'}
+					<TiptapEditor
+						content={formContent}
+						onchange={(v) => (formContent = v)}
+						minHeight="160px"
+					/>
+				{/key}
 
 				<!-- Photos -->
 				<div>
@@ -599,7 +610,6 @@
 
 					{#if visibleExistingPhotos.length > 0 || formPhotos.length > 0}
 						<div class="mb-2 space-y-2">
-							<!-- Existing photos with bed/zone assignment -->
 							{#each visibleExistingPhotos as photo (photo.id)}
 								<div class="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-2">
 									<img src={photo.imagePath} alt={photo.caption || 'Photo'} class="h-16 w-16 flex-shrink-0 rounded-lg border border-slate-200 object-cover" />
@@ -642,7 +652,6 @@
 								</div>
 							{/each}
 
-							<!-- New photo previews -->
 							{#each formPhotos as file, i}
 								<div class="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50/50 p-2">
 									<img src={URL.createObjectURL(file)} alt={file.name} class="h-16 w-16 flex-shrink-0 rounded-lg border border-slate-200 object-cover" />
@@ -714,51 +723,96 @@
 		</div>
 	{/if}
 
-	<!-- Timeline -->
-	{#if loading}
-		<div class="py-16 text-center">
-			<p class="text-sm text-slate-400">Loading entries...</p>
-		</div>
-	{:else if groupedEntries.length === 0}
-		<div class="py-16 text-center">
-			<div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
-				<svg class="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="1.5"
-						d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-					/>
-				</svg>
-			</div>
-			<p class="text-sm font-medium text-slate-600">No journal entries yet</p>
-			<p class="mt-1 text-sm text-slate-400">Create your first entry to start tracking your garden.</p>
-		</div>
-	{:else}
-		<div class="relative ml-3 border-l-2 border-slate-200 pl-6">
-			{#each groupedEntries as group (group.date)}
-				<!-- Date label -->
-				<div class="relative pb-3">
-					<div class="absolute -left-[29px] top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-400"></div>
-					<p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
+	<!-- Two-column layout: timeline + calendar sidebar -->
+	<div class="flex flex-col gap-6 lg:flex-row lg:items-start">
+		<!-- Timeline -->
+		<div class="min-w-0 flex-1">
+			{#if loading}
+				<div class="py-16 text-center">
+					<p class="text-sm text-slate-400">Loading entries...</p>
 				</div>
+			{:else if groupedTimeline.length === 0}
+				<div class="py-16 text-center">
+					<div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100">
+						<svg class="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+						</svg>
+					</div>
+					<p class="text-sm font-medium text-slate-600">No journal entries yet</p>
+					<p class="mt-1 text-sm text-slate-400">Create your first entry to start tracking your garden.</p>
+				</div>
+			{:else}
+				<div class="relative ml-3 border-l-2 border-slate-200 pl-6">
+					{#each groupedTimeline as group (group.date)}
+						<!-- Date label -->
+						<div class="relative pb-3">
+							<div class="absolute -left-[29px] top-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-slate-400"></div>
+							<p class="text-xs font-semibold uppercase tracking-wide text-slate-400">{group.label}</p>
+						</div>
 
-				<!-- Entries for that date -->
-				<div class="space-y-3 pb-10">
-					{#each group.entries as entry (entry.id)}
-						<JournalEntryCard
-							{entry}
-							images={entryImages.get(entry.id) ?? []}
-							beds={allBeds}
-							onEdit={() => openEditForm(entry)}
-							onDelete={() => deleteEntry(entry.id)}
-							onView={() => openEntryModal(entry)}
-						/>
+						<!-- Items for that date -->
+						<div class="space-y-3 pb-10">
+							{#each group.items as item}
+								{#if item.kind === 'journal'}
+									<JournalEntryCard
+										entry={item.entry}
+										images={entryImages.get(item.entry.id) ?? []}
+										beds={allBeds}
+										onEdit={() => openEditForm(item.entry)}
+										onDelete={() => deleteEntry(item.entry.id)}
+										onView={() => openEntryModal(item.entry)}
+									/>
+								{:else}
+									<!-- Planting log entry -->
+									<a
+										href="/plants/{item.entry.plantId}"
+										class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 transition hover:border-emerald-200 hover:bg-emerald-50"
+									>
+										<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
+											<svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+											</svg>
+										</div>
+										<div class="min-w-0 flex-1">
+											<p class="text-sm font-medium text-slate-800">{item.entry.plantName}</p>
+											{#if item.entry.plantVariety}
+												<p class="text-xs text-slate-400">{item.entry.plantVariety}</p>
+											{/if}
+											{#if item.entry.description}
+												<p class="mt-0.5 text-xs text-slate-500">{item.entry.description}</p>
+											{/if}
+										</div>
+										<span class="flex-shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize {item.entry.sourceType === 'seed' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}">
+											{item.entry.sourceType ?? 'planted'}
+										</span>
+										<button
+											type="button"
+											onclick={(e) => { e.preventDefault(); deletePlanting(item.entry.id); }}
+											class="flex-shrink-0 rounded p-1 text-slate-300 transition hover:bg-white hover:text-red-400"
+											aria-label="Delete planting entry"
+										>
+											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+											</svg>
+										</button>
+									</a>
+								{/if}
+							{/each}
+						</div>
 					{/each}
 				</div>
-			{/each}
+			{/if}
 		</div>
-	{/if}
+
+		<!-- Calendar sidebar -->
+		<div class="w-full lg:w-64 lg:flex-shrink-0">
+			<JournalCalendar
+				{datesWithEntries}
+				selectedDate={dateFilter}
+				onSelectDate={(d) => (dateFilter = d)}
+			/>
+		</div>
+	</div>
 
 	<!-- Entry detail modal -->
 	<JournalEntryDetailModal

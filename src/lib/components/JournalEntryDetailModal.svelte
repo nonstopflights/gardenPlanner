@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { tick } from 'svelte';
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { Button } from '$lib/components/ui/button';
+	import TiptapEditor from '$lib/components/TiptapEditor.svelte';
 
 	interface JournalEntry {
 		id: number;
@@ -54,7 +54,6 @@
 	let editDate = $state('');
 	let editTags = $state('');
 	let saving = $state(false);
-	let contentEditableEl: HTMLDivElement;
 	let fileInput: HTMLInputElement;
 
 	$effect(() => {
@@ -63,14 +62,6 @@
 			editContent = entry.content;
 			editDate = entry.entryDate;
 			editTags = entry.tags ? JSON.parse(entry.tags).join(', ') : '';
-		}
-	});
-
-	$effect(() => {
-		if (open && entry && contentEditableEl) {
-			tick().then(() => {
-				if (contentEditableEl) contentEditableEl.textContent = entry.content;
-			});
 		}
 	});
 
@@ -88,12 +79,18 @@
 		if (!entry || !onSave) return;
 		saving = true;
 		try {
-			const content = contentEditableEl?.innerText ?? editContent;
 			await onSave({
 				title: editTitle.trim(),
-				content: content.trim(),
+				content: editContent,
 				entryDate: editDate,
-				tags: editTags.trim() ? JSON.stringify(editTags.split(',').map((t) => t.trim()).filter(Boolean)) : null
+				tags: editTags.trim()
+					? JSON.stringify(
+							editTags
+								.split(',')
+								.map((t) => t.trim())
+								.filter(Boolean)
+						)
+					: null
 			});
 			open = false;
 			onClose?.();
@@ -166,22 +163,21 @@
 
 			<div class="mt-4 space-y-4">
 				<div>
-					<label class="mb-1 block text-xs font-medium text-slate-600">Content</label>
-					<div
-						bind:this={contentEditableEl}
-						contenteditable="true"
-						role="textbox"
-						aria-multiline="true"
-						class="min-h-[120px] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-						style="white-space: pre-wrap;"
-					></div>
+					<label class="mb-1.5 block text-xs font-medium text-slate-600">Content</label>
+					{#key entry.id}
+						<TiptapEditor
+							content={entry.content}
+							onchange={(v) => (editContent = v)}
+							minHeight="150px"
+						/>
+					{/key}
 				</div>
 
 				<div>
 					<label class="mb-1.5 block text-xs font-medium text-slate-600">Photos</label>
 					<div class="flex flex-wrap gap-3">
 						{#each images as img (img.id)}
-							<div class="relative group">
+							<div class="group relative">
 								<img
 									src={img.imagePath}
 									alt={img.caption || 'Photo'}
