@@ -43,11 +43,7 @@
 		matureHeight: '',
 		daysToMaturity: '',
 		plantingSeason: '',
-		startIndoorsWeeks: '',
-		transplantWeeks: '',
-		directSowWeeks: '',
 		growingNotes: '',
-		harvestingNotes: '',
 		seedSource: '',
 		seedSourceUrl: '',
 		seedCost: ''
@@ -90,11 +86,7 @@
 				matureHeight: plant!.matureHeight || '',
 				daysToMaturity: plant!.daysToMaturity?.toString() || '',
 				plantingSeason: plant!.plantingSeason || '',
-				startIndoorsWeeks: plant!.startIndoorsWeeks?.toString() || '',
-				transplantWeeks: plant!.transplantWeeks?.toString() || '',
-				directSowWeeks: plant!.directSowWeeks?.toString() || '',
 				growingNotes: plant!.growingNotes || '',
-				harvestingNotes: plant!.harvestingNotes || '',
 				seedSource: plant!.seedSource || '',
 				seedSourceUrl: plant!.seedSourceUrl || '',
 				seedCost: plant!.seedCost?.toString() || ''
@@ -140,9 +132,6 @@
 					matureHeight: formData.matureHeight || null,
 					daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 					plantingSeason: formData.plantingSeason || null,
-					startIndoorsWeeks: formData.startIndoorsWeeks ? parseInt(formData.startIndoorsWeeks) : null,
-					transplantWeeks: formData.transplantWeeks ? parseInt(formData.transplantWeeks) : null,
-					directSowWeeks: formData.directSowWeeks ? parseInt(formData.directSowWeeks) : null,
 					seedCost: formData.seedCost ? parseFloat(formData.seedCost) : null,
 					seedSource: formData.seedSource || null,
 					seedSourceUrl: formData.seedSourceUrl || null,
@@ -250,14 +239,10 @@
 		if (data.waterNeeds) formData.waterNeeds = data.waterNeeds;
 		if (data.daysToMaturity) formData.daysToMaturity = data.daysToMaturity.toString();
 		if (data.plantingSeason) formData.plantingSeason = data.plantingSeason;
-		if (data.startIndoorsWeeks != null) formData.startIndoorsWeeks = data.startIndoorsWeeks.toString();
-		if (data.transplantWeeks != null) formData.transplantWeeks = data.transplantWeeks.toString();
-		if (data.directSowWeeks != null) formData.directSowWeeks = data.directSowWeeks.toString();
 		if (data.companionPlants) formData.companionPlants = data.companionPlants;
 		if (data.matureHeight) formData.matureHeight = data.matureHeight;
 		if (data.growingNotes) formData.growingNotes = data.growingNotes;
-		if (data.harvestingNotes) formData.harvestingNotes = data.harvestingNotes;
-		if (data.seedSource) formData.seedSource = data.seedSource;
+			if (data.seedSource) formData.seedSource = data.seedSource;
 		if (data.seedSourceUrl) formData.seedSourceUrl = data.seedSourceUrl;
 		if (data.seedCost) formData.seedCost = data.seedCost.toString();
 		if (data.planterRef != null) formData.planterRef = data.planterRef.toString();
@@ -302,9 +287,6 @@
 			harvestDate: formData.harvestDate || null,
 			daysToMaturity: formData.daysToMaturity ? parseInt(formData.daysToMaturity) : null,
 			plantingSeason: formData.plantingSeason || null,
-			startIndoorsWeeks: formData.startIndoorsWeeks ? parseInt(formData.startIndoorsWeeks) : null,
-			transplantWeeks: formData.transplantWeeks ? parseInt(formData.transplantWeeks) : null,
-			directSowWeeks: formData.directSowWeeks ? parseInt(formData.directSowWeeks) : null,
 			spacing: formData.spacing || null,
 			sunRequirements: formData.sunRequirements || null,
 			waterNeeds: formData.waterNeeds || null,
@@ -324,9 +306,6 @@
 		formData.harvestDate = '';
 		formData.daysToMaturity = '';
 		formData.plantingSeason = '';
-		formData.startIndoorsWeeks = '';
-		formData.transplantWeeks = '';
-		formData.directSowWeeks = '';
 		formData.spacing = '';
 		formData.sunRequirements = '';
 		formData.waterNeeds = '';
@@ -515,41 +494,6 @@
 					<option value="both">Both</option>
 				</select>
 			</div>
-			<div>
-				<label class="mb-1 block text-sm font-medium text-slate-700">Start Indoors</label>
-				<div class="flex items-center gap-2">
-					<input
-						type="number"
-						bind:value={formData.startIndoorsWeeks}
-						placeholder="e.g., 6"
-						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-					/>
-					<span class="flex-shrink-0 text-xs text-slate-500">wks before last frost</span>
-				</div>
-			</div>
-			<div>
-				<label class="mb-1 block text-sm font-medium text-slate-700">Transplant Outdoors</label>
-				<div class="flex items-center gap-2">
-					<input
-						type="number"
-						bind:value={formData.transplantWeeks}
-						placeholder="e.g., 2"
-						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-					/>
-					<span class="flex-shrink-0 text-xs text-slate-500">wks after last frost</span>
-				</div>
-			</div>
-			<div>
-				<label class="mb-1 block text-sm font-medium text-slate-700">Direct Sow</label>
-				<div class="flex items-center gap-2">
-					<input
-						type="number"
-						bind:value={formData.directSowWeeks}
-						placeholder="e.g., 0"
-						class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-					/>
-					<span class="flex-shrink-0 text-xs text-slate-500">wks after last frost</span>
-				</div>
 			</div>
 
 			<div class="md:col-span-2">
@@ -634,21 +578,12 @@
 			</div>
 
 			<div class="md:col-span-2">
-				<label class="mb-1 block text-sm font-medium text-slate-700">Growing Notes</label>
-				<textarea
-					bind:value={formData.growingNotes}
-					rows="4"
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-				></textarea>
-			</div>
-			<div class="md:col-span-2">
-				<label class="mb-1 block text-sm font-medium text-slate-700">Harvesting Notes</label>
-				<textarea
-					bind:value={formData.harvestingNotes}
-					rows="4"
-					class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
-				></textarea>
-			</div>
+			<label class="mb-1 block text-sm font-medium text-slate-700">Plant Notes</label>
+			<textarea
+				bind:value={formData.growingNotes}
+				rows="5"
+				class="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400"
+			></textarea>
 		</div>
 		<div class="mt-6 flex gap-3">
 			<button
@@ -763,18 +698,6 @@
 						<label class="mb-1 block text-xs font-medium text-slate-600">Days to Maturity</label>
 						<input type="number" bind:value={formData.daysToMaturity} class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
 					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Start Indoors (wks before frost)</label>
-						<input type="number" bind:value={formData.startIndoorsWeeks} placeholder="e.g., 6" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Transplant (wks after frost)</label>
-						<input type="number" bind:value={formData.transplantWeeks} placeholder="e.g., 2" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Direct Sow (wks after frost)</label>
-						<input type="number" bind:value={formData.directSowWeeks} placeholder="e.g., 0" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
 					{#if showDates}
 						<div>
 							<label class="mb-1 block text-xs font-medium text-slate-600">Planting Date</label>
@@ -860,8 +783,8 @@
 					</div>
 				</div>
 
-				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation || plant?.planterRef != null}
-					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.startIndoorsWeeks != null || plant?.transplantWeeks != null || plant?.directSowWeeks != null || plant?.plantingDate || plant?.harvestDate)}
+				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation || plant?.planterRef != null}
+					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate)}
 					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
 					{@const hasSeed = !!(plant?.seedSourceUrl || plant?.seedLocation)}
 					<div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_1fr_0.95fr]">
@@ -883,30 +806,6 @@
 										</div>
 									{:else if plant?.daysToMaturity}
 										<p class="text-lg font-medium text-slate-700">{plant.daysToMaturity} days to maturity</p>
-									{/if}
-									{#if plant?.startIndoorsWeeks != null}
-										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
-											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-											</span>
-											<span class="leading-6 text-slate-600">Start indoors <strong class="font-semibold text-slate-800">{plant.startIndoorsWeeks} wks</strong> before last frost</span>
-										</div>
-									{/if}
-									{#if plant?.transplantWeeks != null}
-										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
-											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
-											</span>
-											<span class="leading-6 text-slate-600">Transplant <strong class="font-semibold text-slate-800">{plant.transplantWeeks} wks</strong> after last frost</span>
-										</div>
-									{/if}
-									{#if plant?.directSowWeeks != null}
-										<div class="flex items-start gap-3 rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-slate-200/80">
-											<span class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-												<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.66-10H21M3 12H2m15.07-7.07l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707" /></svg>
-											</span>
-											<span class="leading-6 text-slate-600">Direct sow <strong class="font-semibold text-slate-800">{plant.directSowWeeks} wks</strong> after last frost</span>
-										</div>
 									{/if}
 									{#if plant?.plantingDate || plant?.harvestDate}
 										<div class="grid gap-3 sm:grid-cols-2">
@@ -1017,29 +916,17 @@
 		{/if}
 	</div>
 
-		<!-- Growing Notes (WYSIWYG) -->
-		<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-			<h2 class="text-base font-semibold text-slate-900">Growing Notes</h2>
-			<div class="mt-3">
-				<InlineEditor
-					content={plant.growingNotes || ''}
-					placeholder="Click to add growing notes..."
-					onSave={(html) => saveInlineText('growingNotes', html)}
-				/>
-			</div>
+		<!-- Plant Notes (WYSIWYG) -->
+	<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+		<h2 class="text-base font-semibold text-slate-900">Plant Notes</h2>
+		<div class="mt-3">
+			<InlineEditor
+				content={[plant.growingNotes, plant.harvestingNotes].filter(Boolean).join('\n\n') || ''}
+				placeholder="Click to add plant notes..."
+				onSave={(html) => saveSection({ growingNotes: html || null, harvestingNotes: null })}
+			/>
 		</div>
-
-		<!-- Harvesting Notes (WYSIWYG) -->
-		<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
-			<h2 class="text-base font-semibold text-slate-900">Harvesting Notes</h2>
-			<div class="mt-3">
-				<InlineEditor
-					content={plant.harvestingNotes || ''}
-					placeholder="Click to add harvesting notes..."
-					onSave={(html) => saveInlineText('harvestingNotes', html)}
-				/>
-			</div>
-		</div>
+	</div>
 
 		<!-- Web Info -->
 		{#if webInfo}
