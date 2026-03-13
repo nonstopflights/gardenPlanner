@@ -50,7 +50,7 @@
 	}
 </script>
 
-<div class="flex items-start gap-8">
+<div class="flex flex-col gap-8 md:flex-row md:items-start">
 	<div class="min-w-0 flex-1">
 		<PlantLibrary
 			{plants}
@@ -63,7 +63,7 @@
 
 	<!-- Seed Planter Reference Map -->
 	{#if plants.some((p) => p.category === 'current' && p.planterRef != null)}
-		<div class="w-72 flex-shrink-0 rounded-2xl border border-stone-200 bg-stone-50 p-5">
+		<div class="w-full rounded-2xl border border-stone-200 bg-stone-50 p-5 md:w-72 md:flex-shrink-0">
 			<h2 class="font-display mb-1 text-base font-semibold text-slate-900">Seed Planter Map</h2>
 			<div class="mb-4 flex items-center gap-1">
 				<button

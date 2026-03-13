@@ -53,8 +53,8 @@
 
 	const navItems = [
 		{ href: '/', label: 'Dashboard' },
-		{ href: '/beds', label: 'Beds' },
 		{ href: '/plants', label: 'Plants' },
+		{ href: '/beds', label: 'Beds' },
 		{ href: '/journal', label: 'Journal' },
 		{ href: '/settings', label: 'Settings' }
 	];
