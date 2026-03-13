@@ -675,9 +675,9 @@
 
 	<!-- Info cards grid -->
 	<div class="mt-4 sm:mt-6 grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-	<!-- Combined Plant Details card -->
-	<div class="md:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm transition {editingDetails ? 'ring-2 ring-slate-300' : ''}">
-		{#if editingDetails}
+	<!-- Plant Details Edit Form (full-width when editing) -->
+	{#if editingDetails}
+		<div class="md:col-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm ring-2 ring-slate-300">
 			<div class="p-4 sm:p-6">
 				<div class="mb-5 flex items-center justify-between">
 					<h2 class="text-base font-semibold text-slate-900">Plant Details</h2>
@@ -687,6 +687,31 @@
 					</div>
 				</div>
 
+				<p class="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Growing Conditions</p>
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+					<div>
+						<label class="mb-1 block text-xs font-medium text-slate-600">Spacing</label>
+						<input type="text" bind:value={formData.spacing} placeholder="e.g., 18 inches" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+					<div>
+						<label class="mb-1 block text-xs font-medium text-slate-600">Sun Requirements</label>
+						<input type="text" bind:value={formData.sunRequirements} placeholder="e.g., Full sun" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+					<div>
+						<label class="mb-1 block text-xs font-medium text-slate-600">Water Needs</label>
+						<input type="text" bind:value={formData.waterNeeds} placeholder="e.g., Moderate" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+					<div>
+						<label class="mb-1 block text-xs font-medium text-slate-600">Mature Height</label>
+						<input type="text" bind:value={formData.matureHeight} placeholder="e.g., 4-6 feet" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+					<div class="sm:col-span-2">
+						<label class="mb-1 block text-xs font-medium text-slate-600">Companion Plants</label>
+						<input type="text" bind:value={formData.companionPlants} placeholder="e.g., Basil, Marigold" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
+					</div>
+				</div>
+
+				<div class="my-4 border-t border-slate-100"></div>
 				<p class="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Schedule</p>
 				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
 					<div>
@@ -722,31 +747,6 @@
 				</div>
 
 				<div class="my-4 border-t border-slate-100"></div>
-				<p class="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Growing Conditions</p>
-				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Spacing</label>
-						<input type="text" bind:value={formData.spacing} placeholder="e.g., 18 inches" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Sun Requirements</label>
-						<input type="text" bind:value={formData.sunRequirements} placeholder="e.g., Full sun" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Water Needs</label>
-						<input type="text" bind:value={formData.waterNeeds} placeholder="e.g., Moderate" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div>
-						<label class="mb-1 block text-xs font-medium text-slate-600">Mature Height</label>
-						<input type="text" bind:value={formData.matureHeight} placeholder="e.g., 4-6 feet" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-					<div class="sm:col-span-2">
-						<label class="mb-1 block text-xs font-medium text-slate-600">Companion Plants</label>
-						<input type="text" bind:value={formData.companionPlants} placeholder="e.g., Basil, Marigold" class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 placeholder-slate-400 focus:border-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400" />
-					</div>
-				</div>
-
-				<div class="my-4 border-t border-slate-100"></div>
 				<p class="mb-3 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Seed Source</p>
 				<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
 					<div>
@@ -775,141 +775,143 @@
 					{/if}
 				</div>
 			</div>
-		{:else}
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<div onclick={() => (editingDetails = true)} class="group cursor-pointer rounded-2xl p-4 sm:p-6 transition hover:bg-slate-50/50">
+		</div>
+	{:else}
+		{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
+		{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate)}
+		{@const hasSeed = !!(plant?.seedSourceUrl || plant?.seedLocation)}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		{#if hasGrowing}
+			<div onclick={() => (editingDetails = true)} class="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:bg-slate-50/50">
 				<div class="mb-4 flex items-center justify-between">
-					<h2 class="text-base font-semibold text-slate-900">Plant Details</h2>
+					<p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Growing Conditions</p>
 					<div class="flex items-center gap-1 text-xs text-slate-400 opacity-100 transition sm:opacity-0 group-hover:opacity-100">
 						<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-						<span class="hidden sm:inline">Click to edit</span>
+						<span class="hidden sm:inline">Edit</span>
 					</div>
 				</div>
-
-				{#if plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate || plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight || plant?.seedSourceUrl || plant?.seedLocation }
-					{@const hasSchedule = !!(plant?.plantingSeason || plant?.daysToMaturity || plant?.plantingDate || plant?.harvestDate)}
-					{@const hasGrowing = !!(plant?.spacing || plant?.sunRequirements || plant?.waterNeeds || plant?.companionPlants || plant?.matureHeight)}
-					{@const hasSeed = !!(plant?.seedSourceUrl || plant?.seedLocation)}
-					<div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_1fr_0.95fr]">
-						{#if hasSchedule}
-							<div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
-								<p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Schedule</p>
-								<div class="space-y-3">
-									{#if plant?.plantingSeason}
-										<div class="flex flex-wrap items-center gap-3">
-											<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold
-												{plant.plantingSeason === 'spring' ? 'bg-green-100 text-green-800' :
-												 plant.plantingSeason === 'fall' ? 'bg-orange-100 text-orange-800' :
-												 'bg-violet-100 text-violet-800'} capitalize">
-												{plant.plantingSeason}
-											</span>
-											{#if plant?.daysToMaturity}
-												<span class="text-lg font-medium text-slate-600">{plant.daysToMaturity} days to maturity</span>
-											{/if}
-										</div>
-									{:else if plant?.daysToMaturity}
-										<p class="text-lg font-medium text-slate-700">{plant.daysToMaturity} days to maturity</p>
-									{/if}
-									{#if plant?.plantingDate || plant?.harvestDate}
-										<div class="grid gap-3 sm:grid-cols-2">
-											{#if plant?.plantingDate}
-												<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
-													<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Plant on</p>
-													<p class="mt-1 text-sm font-medium text-slate-700">{plant.plantingDate}</p>
-												</div>
-											{/if}
-											{#if plant?.harvestDate}
-												<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
-													<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Harvest by</p>
-													<p class="mt-1 text-sm font-medium text-slate-700">{plant.harvestDate}</p>
-												</div>
-											{/if}
-										</div>
-									{/if}
-								</div>
+				<div class="space-y-3">
+					<div class="grid gap-3">
+						{#if plant?.spacing}
+							<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+								<span class="text-slate-500">Spacing</span>
+								<span class="font-semibold text-slate-800">{plant.spacing}</span>
 							</div>
 						{/if}
-
-						{#if hasGrowing}
-							<div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-								<p class="mb-4 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Growing Conditions</p>
-								<div class="space-y-3">
-									<div class="grid gap-3">
-										{#if plant?.spacing}
-											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
-												<span class="text-slate-500">Spacing</span>
-												<span class="font-semibold text-slate-800">{plant.spacing}</span>
-											</div>
-										{/if}
-										{#if plant?.sunRequirements}
-											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
-												<span class="text-slate-500">Sun</span>
-												<span class="font-semibold text-slate-800">{plant.sunRequirements}</span>
-											</div>
-										{/if}
-										{#if plant?.waterNeeds}
-											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
-												<span class="text-slate-500">Water</span>
-												<span class="font-semibold text-slate-800">{plant.waterNeeds}</span>
-											</div>
-										{/if}
-										{#if plant?.matureHeight}
-											<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
-												<span class="text-slate-500">Height</span>
-												<span class="font-semibold text-slate-800">{plant.matureHeight}</span>
-											</div>
-										{/if}
-									</div>
-									{#if plant?.companionPlants}
-										<div class="rounded-xl border border-slate-200 bg-white p-3">
-											<p class="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Companion Plants</p>
-											<div class="flex flex-wrap gap-2">
-												{#each plant.companionPlants.split(',') as companion}
-													<span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{companion.trim()}</span>
-												{/each}
-											</div>
-										</div>
-									{/if}
-								</div>
+						{#if plant?.sunRequirements}
+							<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+								<span class="text-slate-500">Sun</span>
+								<span class="font-semibold text-slate-800">{plant.sunRequirements}</span>
 							</div>
 						{/if}
-
-						{#if hasSeed }
-							<div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-[linear-gradient(180deg,_rgba(248,250,252,1),_rgba(241,245,249,0.9))] p-5">
-								{#if hasSeed}
-									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
-										<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Source</p>
-										<a
-											href={plant?.seedSourceUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											onclick={(e) => e.stopPropagation()}
-											class="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
-										>
-											{plant?.seedSource || 'Seed Source'}
-											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-										</a>
-									</div>
-								{/if}
-								{#if plant?.seedLocation}
-									<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
-										<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Location</p>
-										<p class="text-sm font-medium text-slate-700">{plant.seedLocation}</p>
-									</div>
-								{/if}
+						{#if plant?.waterNeeds}
+							<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+								<span class="text-slate-500">Water</span>
+								<span class="font-semibold text-slate-800">{plant.waterNeeds}</span>
+							</div>
+						{/if}
+						{#if plant?.matureHeight}
+							<div class="flex items-center justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2.5 text-sm">
+								<span class="text-slate-500">Height</span>
+								<span class="font-semibold text-slate-800">{plant.matureHeight}</span>
 							</div>
 						{/if}
 					</div>
-				{:else}
-					<p class="text-sm italic text-slate-400">No details yet. Click to add planting info and seed source.</p>
-				{/if}
+					{#if plant?.companionPlants}
+						<div class="rounded-xl border border-slate-200 bg-white p-3">
+							<p class="mb-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">Companion Plants</p>
+							<div class="flex flex-wrap gap-2">
+								{#each plant.companionPlants.split(',') as companion}
+									<span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{companion.trim()}</span>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
-	</div>
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div onclick={() => (editingDetails = true)} class="group cursor-pointer rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm transition hover:bg-slate-50">
+			<div class="mb-4 flex items-center justify-between">
+				<p class="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Schedule & Seeds</p>
+				<div class="flex items-center gap-1 text-xs text-slate-400 opacity-100 transition sm:opacity-0 group-hover:opacity-100">
+					<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+					<span class="hidden sm:inline">Edit</span>
+				</div>
+			</div>
+			{#if hasSchedule || hasSeed}
+				<div class="space-y-4">
+					{#if hasSchedule}
+						<div class="space-y-3">
+							{#if plant?.plantingSeason}
+								<div class="flex flex-wrap items-center gap-3">
+									<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold {plant.plantingSeason === 'spring' ? 'bg-green-100 text-green-800' : plant.plantingSeason === 'fall' ? 'bg-orange-100 text-orange-800' : 'bg-violet-100 text-violet-800'} capitalize">
+										{plant.plantingSeason}
+									</span>
+									{#if plant?.daysToMaturity}
+										<span class="text-lg font-medium text-slate-600">{plant.daysToMaturity} days to maturity</span>
+									{/if}
+								</div>
+							{:else if plant?.daysToMaturity}
+								<p class="text-lg font-medium text-slate-700">{plant.daysToMaturity} days to maturity</p>
+							{/if}
+							{#if plant?.plantingDate || plant?.harvestDate}
+								<div class="grid gap-3 sm:grid-cols-2">
+									{#if plant?.plantingDate}
+										<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
+											<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Plant on</p>
+											<p class="mt-1 text-sm font-medium text-slate-700">{plant.plantingDate}</p>
+										</div>
+									{/if}
+									{#if plant?.harvestDate}
+										<div class="rounded-xl bg-white px-3 py-3 shadow-sm ring-1 ring-slate-200/80">
+											<p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Harvest by</p>
+											<p class="mt-1 text-sm font-medium text-slate-700">{plant.harvestDate}</p>
+										</div>
+									{/if}
+								</div>
+							{/if}
+						</div>
+					{/if}
+					{#if hasSchedule && hasSeed}
+						<div class="border-t border-slate-200"></div>
+					{/if}
+					{#if hasSeed}
+						<div class="space-y-3">
+							{#if plant?.seedSourceUrl}
+								<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+									<p class="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Source</p>
+									<a
+										href={plant?.seedSourceUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										onclick={(e) => e.stopPropagation()}
+										class="inline-flex items-center gap-1 text-sm font-semibold text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
+									>
+										{plant?.seedSource || 'Seed Source'}
+										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+									</a>
+								</div>
+							{/if}
+							{#if plant?.seedLocation}
+								<div class="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200/80">
+									<p class="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">Seed Location</p>
+									<p class="text-sm font-medium text-slate-700">{plant.seedLocation}</p>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<p class="text-sm italic text-slate-400">No schedule or seed details yet. Click to add.</p>
+			{/if}
+		</div>
+	{/if}
 
-		<!-- Plant Notes (WYSIWYG) -->
-	<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
+	<!-- Plant Notes (full width) -->
+	<div class="md:col-span-2 rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm">
 		<h2 class="text-base font-semibold text-slate-900">Plant Notes</h2>
 		<div class="mt-3">
 			<InlineEditor
@@ -920,27 +922,26 @@
 		</div>
 	</div>
 
-		<!-- Web Info -->
-		{#if webInfo}
-			<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm md:col-span-2">
-				<h2 class="text-base font-semibold text-slate-900">Web Information</h2>
-				{#if webInfo.description}
-					<p class="mt-4 text-sm text-slate-600">{webInfo.description}</p>
-				{/if}
-				{#if webInfo.sourceUrl}
-					<a
-						href={webInfo.sourceUrl}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="mt-3 inline-block text-sm text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
-					>
-						View source
-					</a>
-				{/if}
-			</div>
-		{/if}
+	<!-- Web Info -->
+	{#if webInfo}
+		<div class="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm md:col-span-2">
+			<h2 class="text-base font-semibold text-slate-900">Web Information</h2>
+			{#if webInfo.description}
+				<p class="mt-4 text-sm text-slate-600">{webInfo.description}</p>
+			{/if}
+			{#if webInfo.sourceUrl}
+				<a
+					href={webInfo.sourceUrl}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="mt-3 inline-block text-sm text-slate-600 underline decoration-slate-300 hover:text-slate-900 hover:decoration-slate-500"
+				>
+					View source
+				</a>
+			{/if}
+		</div>
+	{/if}
 	</div>
-
 	<!-- Planting Calendar -->
 	{#if plant.plantingSeason}
 		<div class="mt-6">
