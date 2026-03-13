@@ -43,10 +43,20 @@
 		plantId: number;
 		plantName: string;
 		plantVariety: string | null;
+		activityType: string;
 		sourceType: string | null;
 		activityDate: string;
 		description: string | null;
 	}
+
+	const ACTIVITY_COLORS: Record<string, string> = {
+		planted: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+		watered: 'border-sky-200 bg-sky-50 text-sky-700',
+		fertilized: 'border-amber-200 bg-amber-50 text-amber-700',
+		harvested: 'border-green-200 bg-green-50 text-green-700',
+		pruned: 'border-orange-200 bg-orange-50 text-orange-700',
+		note: 'border-slate-200 bg-slate-50 text-slate-700'
+	};
 
 	let allPlants: Plant[] = $state([]);
 	let plantingEntries: PlantingEntry[] = $state([]);
@@ -782,8 +792,8 @@
 												<p class="mt-0.5 text-xs text-slate-500">{item.entry.description}</p>
 											{/if}
 										</div>
-										<span class="flex-shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize {item.entry.sourceType === 'seed' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-emerald-200 bg-emerald-50 text-emerald-700'}">
-											{item.entry.sourceType ?? 'planted'}
+										<span class="flex-shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize {ACTIVITY_COLORS[item.entry.activityType] ?? ACTIVITY_COLORS.note}">
+											{item.entry.activityType}
 										</span>
 										<button
 											type="button"

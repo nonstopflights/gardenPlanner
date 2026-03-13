@@ -478,6 +478,31 @@ export async function getAllPlantingActivities(seasonId?: number) {
 	return activities;
 }
 
+export async function getAllActivities(seasonId?: number) {
+	const conditions: ReturnType<typeof eq>[] = [];
+	if (seasonId) {
+		conditions.push(eq(plantActivities.seasonId, seasonId));
+	}
+	const activities = await db
+		.select({
+			id: plantActivities.id,
+			plantId: plantActivities.plantId,
+			plantName: plants.name,
+			plantVariety: plants.variety,
+			seasonId: plantActivities.seasonId,
+			activityType: plantActivities.activityType,
+			sourceType: plantActivities.sourceType,
+			description: plantActivities.description,
+			activityDate: plantActivities.activityDate,
+			createdAt: plantActivities.createdAt
+		})
+		.from(plantActivities)
+		.innerJoin(plants, eq(plantActivities.plantId, plants.id))
+		.where(conditions.length > 0 ? and(...conditions) : undefined)
+		.orderBy(desc(plantActivities.activityDate));
+	return activities;
+}
+
 export async function getRecentActivities(limit: number = 10, seasonId?: number) {
 	if (seasonId) {
 		return db
