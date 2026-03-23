@@ -150,21 +150,26 @@
 	});
 </script>
 
-<div class="{compact ? 'flex flex-col h-full' : 'p-4'}">
+<div class="{compact ? 'flex flex-col h-full' : 'space-y-6'}">
 	<!-- Sticky filter controls -->
-	<div class="{compact ? 'sticky top-0 z-10 bg-white border-b border-slate-100 p-3 space-y-3' : 'mb-6 space-y-6'}">
+	<div class="{compact ? 'sticky top-0 z-10 bg-white border-b border-slate-100 p-3 space-y-3' : 'rounded-[1.75rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(250,250,249,0.96))] p-4 shadow-[0_20px_44px_-38px_rgba(15,23,42,0.35)] sm:p-5 space-y-5'}">
 		<!-- Search + Add -->
 		<div class="{compact ? 'flex items-center gap-2' : 'flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'}">
-			<input
-				type="text"
-				placeholder="Search plants..."
-				bind:value={searchQuery}
-				class="h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 {compact ? '' : 'h-10 sm:max-w-sm'}"
-			/>
+			<div class="{compact ? 'w-full' : 'space-y-1'}">
+				{#if !compact}
+					<p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-stone-500">Library Controls</p>
+				{/if}
+				<input
+					type="text"
+					placeholder="Search plants..."
+					bind:value={searchQuery}
+					class="h-9 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 {compact ? '' : 'h-11 sm:max-w-md'}"
+				/>
+			</div>
 		{#if !compact}
 			<button
 				onclick={onAddPlant}
-				class="inline-flex h-10 items-center justify-center rounded-md bg-emerald-700 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-800"
+				class="inline-flex h-11 items-center justify-center rounded-xl bg-slate-900 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800"
 			>
 				+ Add Plant
 			</button>
@@ -288,18 +293,18 @@
 					{/if}
 				</div>
 		{:else}
-			<!-- Full: original card grid layout -->
-			<section class="rounded-xl border border-stone-200 bg-stone-50/60 p-3 sm:p-4">
+			<!-- Full: grouped card grid layout -->
+			<section class="rounded-[1.75rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.92))] p-4 shadow-[0_18px_48px_-42px_rgba(15,23,42,0.4)] sm:p-5">
 				<button
 					type="button"
 					onclick={() => toggleTypeSection(group.type)}
-					class="mb-3 flex w-full items-center justify-between rounded-md px-1 py-1 text-left transition hover:bg-stone-100/70"
+					class="mb-4 flex w-full items-center justify-between rounded-xl px-2 py-2 text-left transition hover:bg-stone-100/70"
 					aria-expanded={!collapsedTypes.has(group.type)}
 					aria-controls={sectionId(group.type)}
 				>
 					<div class="flex items-center gap-2.5">
-						<h3 class="font-display text-sm font-semibold italic text-stone-600">{group.type}</h3>
-						<span class="rounded-full border border-stone-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-stone-500">
+						<h3 class="font-display text-base font-semibold text-slate-800">{group.type}</h3>
+						<span class="rounded-full border border-stone-200 bg-white px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-stone-500">
 							{group.plants.length}
 						</span>
 					</div>
@@ -331,4 +336,3 @@
 		</div>
 	{/if}
 </div>
-

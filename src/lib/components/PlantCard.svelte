@@ -47,14 +47,14 @@
 
 	let heightSize = $derived(getHeightSize(plant.matureHeight));
 
-	function getCategoryAccent(category: string | null): { border: string; gradient: string } {
+	function getCategoryAccent(category: string | null): { badge: string; dot: string } {
 		switch (category) {
 			case 'current':
-				return { border: 'border-l-emerald-500', gradient: 'from-emerald-600/10' };
+				return { badge: 'border-emerald-200 bg-emerald-50 text-emerald-800', dot: 'bg-emerald-500' };
 			case 'want':
-				return { border: 'border-l-sky-400', gradient: 'from-sky-600/10' };
+				return { badge: 'border-sky-200 bg-sky-50 text-sky-800', dot: 'bg-sky-500' };
 			default:
-				return { border: 'border-l-stone-300', gradient: 'from-stone-600/8' };
+				return { badge: 'border-stone-200 bg-stone-100 text-stone-700', dot: 'bg-stone-400' };
 		}
 	}
 
@@ -97,37 +97,50 @@
 	draggable={browser}
 	ondragstart={handleDragStart}
 	ondragend={handleDragEnd}
-	class="group cursor-grab rounded-2xl border border-slate-200 border-l-4 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing touch-manipulation {categoryAccent.border} {isDragging ? 'opacity-50' : ''}"
+	class="group cursor-grab rounded-[1.6rem] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,255,255,1),rgba(250,250,249,0.96))] p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.45)] transition duration-200 hover:-translate-y-1 hover:border-stone-300 hover:shadow-[0_24px_44px_-30px_rgba(15,23,42,0.32)] active:cursor-grabbing touch-manipulation {isDragging ? 'opacity-50' : ''}"
 	onclick={handleCardClick}
 	onkeydown={handleKeyDown}
 	role="button"
 	tabindex="0"
 >
+	<div class="mb-3 flex items-start justify-between gap-3">
+		<span class="inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] {categoryAccent.badge}">
+			<span class="h-2 w-2 rounded-full {categoryAccent.dot}"></span>
+			{plant.category ?? 'Plant'}
+		</span>
+		{#if plant.planterRef != null}
+			<span class="rounded-full border border-stone-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-stone-500">
+				Tray {plant.planterRef}
+			</span>
+		{/if}
+	</div>
+
 	{#if imageUrl}
-		<div class="relative h-32 w-full overflow-hidden rounded-xl">
+		<div class="relative h-36 w-full overflow-hidden rounded-[1.25rem] border border-stone-200 bg-stone-100">
 			<img
 				src={imageUrl}
 				alt={plant.name}
-				class="h-full w-full object-cover"
+				class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
 				loading="lazy"
 			/>
-			<div class="absolute inset-0 bg-gradient-to-t {categoryAccent.gradient} to-transparent"></div>
 		</div>
 	{:else}
 		<div
-			class="flex h-32 w-full items-center justify-center rounded-xl bg-stone-100 text-3xl"
+			class="flex h-36 w-full items-center justify-center rounded-[1.25rem] border border-dashed border-stone-300 bg-stone-100/80 text-3xl"
 		>
 			<span>🌱</span>
 		</div>
 	{/if}
-	<div class="mt-3 font-display text-base font-semibold text-slate-900">{plant.name}</div>
+
+	<div class="mt-4 font-display text-lg font-semibold leading-tight text-slate-900">{plant.name}</div>
 	{#if plant.variety}
-		<div class="text-sm text-stone-500 italic">{plant.variety}</div>
+		<div class="mt-1 text-sm italic text-stone-500">{plant.variety}</div>
 	{/if}
-	<div class="mt-3 flex flex-wrap gap-1.5">
+
+	<div class="mt-4 flex flex-wrap gap-1.5">
 		{#if plant.plantType}
 			<span
-				class="rounded-full border border-purple-200 bg-purple-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-purple-700"
+				class="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-700"
 			>
 				{plant.plantType}
 			</span>
@@ -143,7 +156,7 @@
 			<span
 				class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-700"
 			>
-				Seeds ✓
+				Seeds Ready
 			</span>
 		{/if}
 	</div>
