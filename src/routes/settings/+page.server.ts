@@ -42,12 +42,15 @@ function loadBackups() {
 		.sort((a, b) => b.created.localeCompare(a.created));
 }
 
+const ICLOUD_BACKUP_DEST =
+	'/Users/server/Library/Mobile Documents/com~apple~CloudDocs/Server/Backups/GardenPlanner';
+
 export const load: PageServerLoad = async ({ cookies }) => {
 	return {
 		model: normalizeModel(cookies.get(COOKIE_NAME)),
 		allowedModels: ALLOWED_MODELS,
 		backups: loadBackups(),
-		backupDir: join(process.cwd(), 'backup')
+		backupDir: ICLOUD_BACKUP_DEST
 	};
 };
 
