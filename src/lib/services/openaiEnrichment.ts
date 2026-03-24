@@ -14,21 +14,23 @@ function getClient(): OpenAI | null {
 }
 
 export type OpenAIModelId =
+	| 'gpt-5.4-mini'
 	| 'gpt-5-mini'
 	| 'gpt-5.2-chat-latest'
 	| 'gpt-4o-mini'
 	| 'gpt-4o'
 	| 'gpt-4.1';
 
-/** Default when no model selected. gpt-4o-mini is documented and widely available. */
+/** Default when no model selected. */
 function normalizeModelId(value: unknown): OpenAIModelId {
-	if (typeof value !== 'string') return 'gpt-4o-mini';
+	if (typeof value !== 'string') return 'gpt-5.4-mini';
+	if (value === 'gpt-5.4-mini') return value;
 	if (value === 'gpt-5-mini') return value;
 	if (value === 'gpt-5.2-chat-latest') return value;
 	if (value === 'gpt-4o-mini') return value;
 	if (value === 'gpt-4o') return value;
 	if (value === 'gpt-4.1') return value;
-	return 'gpt-4o-mini';
+	return 'gpt-5.4-mini';
 }
 
 export interface PlantLookupResult {
