@@ -46,7 +46,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	return {
 		model: normalizeModel(cookies.get(COOKIE_NAME)),
 		allowedModels: ALLOWED_MODELS,
-		backups: loadBackups()
+		backups: loadBackups(),
+		backupDir: join(process.cwd(), 'backup')
 	};
 };
 

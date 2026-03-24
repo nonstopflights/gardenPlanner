@@ -74,7 +74,7 @@
 						</Select.Content>
 					</Select.Root>
 					<p class="text-xs text-slate-500">
-						Default is <span class="font-medium text-slate-700">gpt-4o-mini</span>. This setting is stored in a cookie.
+						Default is <span class="font-medium text-slate-700">gpt-5.4-mini</span>. This setting is stored in a cookie.
 					</p>
 				</div>
 
@@ -92,6 +92,12 @@
 				Backups include the database and all images. The last 5 are kept automatically.
 				Backups also sync to iCloud when running on the server.
 			</CardDescription>
+			<p class="mt-2 flex items-center gap-1.5 font-mono text-xs text-slate-400">
+				<svg class="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+				</svg>
+				{data.backupDir}
+			</p>
 		</CardHeader>
 		<CardContent class="space-y-4">
 			<form method="POST" action="?/backup" class="flex justify-end">
