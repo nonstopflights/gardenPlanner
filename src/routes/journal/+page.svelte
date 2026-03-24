@@ -463,7 +463,7 @@
 	<!-- Page header -->
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<h1 class="text-lg font-semibold text-slate-900">Journal</h1>
+			<h1 class="text-2xl font-semibold text-slate-900">Journal</h1>
 			<p class="text-sm text-slate-500">Notes, observations, and garden logs.</p>
 		</div>
 		<div class="flex gap-2">
@@ -778,10 +778,38 @@
 										href="/plants/{item.entry.plantId}"
 										class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/40 px-4 py-3 transition hover:border-emerald-200 hover:bg-emerald-50"
 									>
-										<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100">
-											<svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-											</svg>
+										<div class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full {item.entry.activityType === 'note' ? 'bg-slate-100' : item.entry.activityType === 'harvested' ? 'bg-green-100' : item.entry.activityType === 'watered' ? 'bg-sky-100' : item.entry.activityType === 'fertilized' ? 'bg-amber-100' : item.entry.activityType === 'pruned' ? 'bg-orange-100' : 'bg-emerald-100'}">
+											{#if item.entry.activityType === 'note'}
+												<!-- Pencil icon -->
+												<svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+												</svg>
+											{:else if item.entry.activityType === 'harvested'}
+												<!-- Scissors icon -->
+												<svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z" />
+												</svg>
+											{:else if item.entry.activityType === 'watered'}
+												<!-- Drop icon -->
+												<svg class="h-4 w-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C12 2 5 10 5 14a7 7 0 0014 0c0-4-7-12-7-12z" />
+												</svg>
+											{:else if item.entry.activityType === 'fertilized'}
+												<!-- Sparkle/star icon -->
+												<svg class="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3l1.5 4.5L11 9l-4.5 1.5L5 15l-1.5-4.5L-1 9l4.5-1.5L5 3zM19 13l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
+												</svg>
+											{:else if item.entry.activityType === 'pruned'}
+												<!-- Trim/cut icon -->
+												<svg class="h-4 w-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 9l6 6 6-6" />
+												</svg>
+											{:else}
+												<!-- Default: seedling/planted icon -->
+												<svg class="h-4 w-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22V12m0 0C12 7 8 4 3 4c0 5 3 8 9 8zm0 0c0-5 4-8 9-8 0 5-3 8-9 8z" />
+												</svg>
+											{/if}
 										</div>
 										<div class="min-w-0 flex-1">
 											<p class="text-sm font-medium text-slate-800">{item.entry.plantName}</p>

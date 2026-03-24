@@ -70,10 +70,10 @@
 			<div class="min-w-0">
 				<p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-stone-500">Plants Dashboard</p>
 				<h1 class="mt-2 font-display text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-					Your plant library, without the visual noise.
+					Plant Library
 				</h1>
 				<p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-[15px]">
-					Browse your current beds, wishlist, and archive from one calmer workspace. The dashboard now leans on spacing, grouping, and quieter surfaces instead of heavy color effects.
+					Browse and manage your current beds, wishlist, and seed archive.
 				</p>
 				{#if mappedPlants.length > 0}
 					<div class="mt-5">

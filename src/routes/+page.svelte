@@ -226,7 +226,7 @@
 
 	<!-- Header image -->
 	<div class="mb-8 overflow-hidden rounded-2xl">
-		<img src="/header.png" alt="Garden" class="w-full object-cover" />
+		<img src="/header.png" alt="Garden" class="w-full object-cover max-h-56 sm:max-h-64" />
 	</div>
 
 	<!-- To Do This Week -->
@@ -281,9 +281,9 @@
 						<button
 							onclick={() => markTaskDone(task)}
 							title="Mark as done"
-							class="flex-shrink-0 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600"
+							class="flex-shrink-0 flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600"
 						>
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 								<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
 							</svg>
 						</button>
