@@ -33,3 +33,6 @@ database/*.backup
 
 # Plant images fetched from web (included in backup, not in repo)
 static/plant-images/web/
+
+# Logs (keep directory via .gitkeep, ignore log files)
+logs/*.log

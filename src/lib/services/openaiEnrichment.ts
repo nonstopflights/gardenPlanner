@@ -1,36 +1,36 @@
 import OpenAI from 'openai';
-import { OPENAI_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 // import type { SeedProductData } from './seedSiteScraper';
 
 let client: OpenAI | null = null;
 
 function getClient(): OpenAI | null {
-	if (!OPENAI_API_KEY?.trim()) return null;
+	const key = env.OPENAI_API_KEY?.trim();
+	if (!key) {
+		console.warn('[OpenAI] OPENAI_API_KEY is not set in environment variables.');
+		return null;
+	}
 	if (!client) {
-		client = new OpenAI({ apiKey: OPENAI_API_KEY });
+		client = new OpenAI({ apiKey: key });
 	}
 	return client;
 }
 
 export type OpenAIModelId =
-	| 'gpt-5.4-mini'
-	| 'gpt-5-mini'
-	| 'gpt-5.2-chat-latest'
 	| 'gpt-4o-mini'
 	| 'gpt-4o'
-	| 'gpt-4.1';
+	| 'gpt-4.1'
+	| 'gpt-4.1-mini';
 
 /** Default when no model selected. */
 function normalizeModelId(value: unknown): OpenAIModelId {
-	if (typeof value !== 'string') return 'gpt-5.4-mini';
-	if (value === 'gpt-5.4-mini') return value;
-	if (value === 'gpt-5-mini') return value;
-	if (value === 'gpt-5.2-chat-latest') return value;
+	if (typeof value !== 'string') return 'gpt-4o-mini';
 	if (value === 'gpt-4o-mini') return value;
 	if (value === 'gpt-4o') return value;
 	if (value === 'gpt-4.1') return value;
-	return 'gpt-5.4-mini';
+	if (value === 'gpt-4.1-mini') return value;
+	return 'gpt-4o-mini';
 }
 
 export interface PlantLookupResult {
